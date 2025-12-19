@@ -1,3 +1,7 @@
+local player = player
+
+local PlayerIterator = player.Iterator
+
 local EVENT = {}
 
 local kevin_scale = CreateConVar("randomat_homealone_scale", 0.75, FCVAR_NONE, "The scale factor to use for Kevin", 0.5, 1)
@@ -60,7 +64,7 @@ function EVENT:Begin()
         -- We take the base jump power out of this as a known constant and then
         -- give a small jump boost of 5 extra power to "round up" the jump estimates
         -- so that smaller sizes can still clear jump+crouch blocks
-        jumpPower = jumpPower + (-(120 * scale) + 125)
+        jumpPower = jumpPower + (-(120 * kevin_scale_val) + 125)
     end
     kevin:SetJumpPower(jumpPower)
 
@@ -98,7 +102,7 @@ end
 
 function EVENT:End()
     self:ResetAllPlayerScales()
-    for _, p in player.Iterator() do
+    for _, p in PlayerIterator() do
         p:SetJumpPower(defaultJumpPower)
     end
 end

@@ -1,3 +1,7 @@
+local string = string
+
+local StringUpper = string.upper
+
 local EVENT = {}
 EVENT.id = "homealone"
 
