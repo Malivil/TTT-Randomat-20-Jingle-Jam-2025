@@ -1,12 +1,9 @@
 local ipairs = ipairs
-local net = net
 local player = player
 local table = table
 
 local PlayerIterator = player.Iterator
 local TableHasValue = table.HasValue
-
-util.AddNetworkString("RdmtColumboBegin")
 
 local EVENT = {}
 
@@ -15,7 +12,7 @@ EVENT.AltTitle = "Columbo"
 EVENT.Description = "...and I'll get out of your hair"
 EVENT.ExtDescription = "The detective can no longer take or deal damage, but traitors win when all non-detective innocents are dead"
 EVENT.id = "columbo"
-EVENT.Categories = {"fun", "biased_traitor", "moderateimpact"}
+EVENT.Categories = {"biased_traitor", "moderateimpact"}
 
 function EVENT:GetAliveDetective()
     -- Find the first detective in a randomized list of alive players
@@ -27,9 +24,6 @@ function EVENT:GetAliveDetective()
 end
 
 function EVENT:Begin()
-    net.Start("RdmtColumboBegin")
-    net.Broadcast()
-
     local columbo = self:GetAliveDetective()
 
     timer.Simple(0.1, function()

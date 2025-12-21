@@ -1,7 +1,12 @@
-local net = net
 local surface = surface
 
+local EVENT = {}
+
+EVENT.id = "columbo"
+
 local columbo_sound = "columbo.mp3"
-net.Receive("RdmtColumboBegin", function()
+function EVENT:Begin()
     surface.PlaySound(columbo_sound)
-end)
+end
+
+Randomat:register(EVENT)
