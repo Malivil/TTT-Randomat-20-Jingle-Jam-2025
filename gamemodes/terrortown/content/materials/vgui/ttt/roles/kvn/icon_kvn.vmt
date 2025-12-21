@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+ "$basetexture" "vgui/ttt/roles/kvn/icon_kvn"
+ "$vertexcolor" 1
+ "$vertexalpha" 1
+ "$translucent" 1
+}

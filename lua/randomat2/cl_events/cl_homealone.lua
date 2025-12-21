@@ -67,26 +67,26 @@ function EVENT:Begin()
     ---------------
 
     self:AddHook("TTTTargetIDPlayerRoleIcon", function(ply, cli, role, noz, colorRole, hideBeggar, showJester, hideBodysnatcher)
-        if ply:IsActiveKevin() and ply:Alive() then
+        if ply:IsActiveRole(ROLE_KEVIN) then
             return ROLE_KEVIN, false
         end
     end)
 
     self:AddHook("TTTTargetIDPlayerRing", function(ent, cli, ringVisible)
-        if IsPlayer(ent) and ent:IsActiveKevin() and ent:Alive() then
+        if IsPlayer(ent) and ent:IsActiveRole(ROLE_KEVIN) then
             return true, ROLE_COLORS_RADAR[ROLE_KEVIN]
         end
     end)
 
     self:AddHook("TTTTargetIDPlayerText", function(ent, cli, text, clr, secondaryText)
-        if IsPlayer(ent) and ent:IsActiveKevin() and ent:Alive() then
+        if IsPlayer(ent) and ent:IsActiveRole(ROLE_KEVIN) then
             return StringUpper(ROLE_STRINGS[ROLE_KEVIN]), ROLE_COLORS_RADAR[ROLE_KEVIN]
         end
     end)
 
     ROLE_IS_TARGETID_OVERRIDDEN[ROLE_KEVIN] = function(ply, target)
         if not IsPlayer(target) then return end
-        if not target:IsActiveKevin() or not target:Alive() then return end
+        if not target:IsActiveRole(ROLE_KEVIN) then return end
 
         ------ icon, ring, text
         return true, true, true
@@ -96,15 +96,15 @@ function EVENT:Begin()
     -- SCOREBOARD --
     ----------------
 
-    self:AddHook("TTTScoreboardPlayerRole", "Kevin_TTTScoreboardPlayerRole", function(ply, cli, color, roleFileName)
-        if ply:IsKevin() then
+    self:AddHook("TTTScoreboardPlayerRole", function(ply, cli, color, roleFileName)
+        if ply:IsRole(ROLE_KEVIN) then
             return ROLE_COLORS_SCOREBOARD[ROLE_KEVIN], ROLE_STRINGS_SHORT[ROLE_KEVIN]
         end
     end)
 
     ROLE_IS_SCOREBOARD_INFO_OVERRIDDEN[ROLE_KEVIN] = function(ply, target)
         if not IsPlayer(target) then return end
-        if not target:IsKevin() then return end
+        if not target:IsRole(ROLE_KEVIN) then return end
 
         ------ name,  role
         return false, true
