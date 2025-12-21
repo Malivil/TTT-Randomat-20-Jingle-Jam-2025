@@ -83,7 +83,7 @@ function EVENT:Condition()
 
     -- Explicitly ban any role that we know requires killing everyone but isn't independent
     local banned_roles = {ROLE_CLOWN, ROLE_DETECTOCLOWN}
-    for p, _ in PlayerIterator() do
+    for _, p in PlayerIterator() do
         local role = p:GetRole()
         if TableHasValue(banned_roles, p) then return false end
 
