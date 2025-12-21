@@ -20,14 +20,13 @@ CreateConVar("randomat_chachaslide_timer", 15, FCVAR_NONE, "The amount of time p
 
 local startingLength = 4
 local currentLength = nil
-local buttons = {
-    ↑ = IN_FORWARD,
-    ↓ = IN_BACK,
-    ← = IN_MOVELEFT,
-    → = IN_MOVERIGHT,
-    CROUCH = IN_DUCK,
-    JUMP = IN_JUMP
-}
+local buttons = {}
+buttons["↑"] = IN_FORWARD
+buttons["↓"] = IN_BACK
+buttons["←"] = IN_MOVELEFT
+buttons["→"] = IN_MOVERIGHT
+buttons["CROUCH"] = IN_DUCK
+buttons["JUMP"] = IN_JUMP
 
 function EVENT:ChooseSequence(first, quiz_time)
     local chosen = {}
