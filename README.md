@@ -41,5 +41,19 @@ _ttt_randomat_columbo_ - Default: 1 - Whether this event is enabled.\
 _ttt_randomat_columbo_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
 _ttt_randomat_columbo_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.
 
+## Trampoline
+_Suggested By_: spooky worm\
+Hitting the ground near other players causes them to launch into the air.
+\
+\
+**ConVars**
+\
+_ttt_randomat_trampoline_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_trampoline_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_trampoline_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_trampoline_stomp_ - Default: 1 - Whether to allow stomp damage during the event.\
+_randomat_trampoline_radius_ - Default: 100 - The radius around a landing player to launch others.\
+_randomat_trampoline_min_speed_ - Default: 200 - The minimum fall speed a player must land with to launch others.
+
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
