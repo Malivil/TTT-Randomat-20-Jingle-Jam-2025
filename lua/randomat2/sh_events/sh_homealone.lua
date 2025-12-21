@@ -57,6 +57,20 @@ function HOMEALONE:RegisterRole()
 
     CreateShopConVars(ROLE_KEVIN)
 
+    DefaultEquipment[ROLE_KEVIN] = {
+        EQUIP_RADAR
+    }
+    EquipmentItems[ROLE_KEVIN] = {
+        {
+            id = EQUIP_RADAR,
+            type = "item_active",
+            material = "vgui/ttt/icon_radar",
+            name = "item_radar",
+            desc = "item_radar_desc",
+            norandom = true
+        }
+    }
+
     if SERVER then
         -- Generate this after registering the roles so we have the role IDs
         WIN_KEVIN = GenerateNewWinID(ROLE_KEVIN)
