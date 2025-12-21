@@ -3,6 +3,21 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 
 # Events
 
+## Heating Up
+_Suggested By_: Corvatile\
+Keep out of the rising lava or risk burns!.
+\
+\
+**ConVars**
+\
+_ttt_randomat_heatingup_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_heatingup_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_heatingup_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_heatingup_move_interval_ - Default: 0.75 - How often the lava should move upwards.\
+_randomat_heatingup_move_amount_ - Default: 0.25 - How much the lava should move upwards.\
+_randomat_heatingup_damage_interval_ - Default: 1 - How often the lava should cause damage.\
+_randomat_heatingup_damage_amount_ - Default: 1 - How much damage the lava should cause.
+
 ## Home Alone
 _Suggested By_: Neil\
 It's Kevin vs. the Wet Bandits in a deadly version of the beloved movie.
