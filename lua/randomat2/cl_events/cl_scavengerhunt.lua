@@ -65,7 +65,7 @@ local function HandleEntityHint(ent)
     if not SCAVENGER_HUNT:IsHuntTarget(client, entModel) then return end
 
     if SCAVENGER_HUNT:IsCollected(client, entModel) then
-        return { hint = "scavengerhunt_hint_duplicate", }
+        return { hint = "scavengerhunt_hint_duplicate" }
     end
 
     return

@@ -5,7 +5,7 @@ local string = string
 local table = table
 local timer = timer
 
-local EntsCreate = ents.Create
+local CreateEntity = ents.Create
 local GetAllEnts = ents.GetAll
 local PlayerIterator = player.Iterator
 local StringStartsWith = string.StartsWith
@@ -160,16 +160,15 @@ function EVENT:Begin()
             model = TableRandom(model)
         end
 
-        local prop = EntsCreate("prop_physics")
+        local prop = CreateEntity("prop_physics")
         prop:SetModel(model)
         prop:PhysicsInit(SOLID_VPHYSICS)
         prop:SetModelScale(1)
         local pos, posKey = TableRandom(entsPos)
-        print(model, pos)
         TableRemove(entsPos, posKey)
         prop:SetPos(FindRespawnLocation(pos) or pos)
         prop:Spawn()
-        prop:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+        prop:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE)
 
         local phys = prop:GetPhysicsObject()
         if IsValid(phys) then
