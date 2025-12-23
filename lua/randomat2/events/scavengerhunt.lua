@@ -24,7 +24,10 @@ EVENT.Categories = {"gamemode", "largeimpact"}
 
 CreateConVar("randomat_scavengerhunt_count", 10, FCVAR_NONE, "The number of props a player has to find to win", 1, 25)
 
+local winnerFound = nil
 local function Collect(ply, ent, model)
+    if winnerFound then return end
+
     -- Sanity check
     if not SCAVENGER_HUNT:IsHuntTarget(ply, model) then return end
 
@@ -36,8 +39,15 @@ local function Collect(ply, ent, model)
     TableInsert(ply.RdmtScavengerHuntCollected, name)
     SafeRemoveEntity(ent)
 
+    -- Handle a player collecting everything
     if #ply.RdmtScavengerHuntCollected == #ply.RdmtScavengerHuntTargets then
-        -- TODO: Handle a player collecting everything
+        winnerFound = ply
+        ply:SetNWBool("RdmtScavengerHuntWinner", true)
+
+        -- Stop the win checks so someone else doesn't steal this player's win
+        StopWinChecks()
+        -- Delay the actual end for a second so the state has a chance to propagate
+        timer.Simple(1, function() EndRound(WIN_INNOCENT) end)
     end
 
     net.Start("RdmtScavengerHuntCollected")
@@ -69,6 +79,8 @@ local function SetupEntity(ent)
 end
 
 function EVENT:Begin()
+    winnerFound = nil
+
     for _, ent in ipairs(GetAllEnts()) do
         local entClass = ent:GetClass()
         if not StringStartsWith(entClass, "prop_physics") and entClass ~= "prop_dynamic" then continue end
@@ -96,6 +108,14 @@ function EVENT:Begin()
         end)
     end)
 
+    self:AddHook("TTTPrintResultMessage", function(win_type)
+        if not winnerFound then return end
+
+        LANG.Msg("win_scavenger_hunt", { name = winnerFound:Nick() })
+        ServerLog("Result: " .. winnerFound:Nick() .. " wins.\n")
+        return true
+    end)
+
     local chosenProps = {}
     local count = GetConVar("randomat_scavengerhunt_count"):GetInt()
     -- Choose random props per alive player and send them to their client-side
@@ -121,6 +141,7 @@ function EVENT:End()
     for _, p in PlayerIterator() do
         p.RdmtScavengerHuntTargets = nil
         p.RdmtScavengerHuntCollected = nil
+        p:SetNWBool("RdmtScavengerHuntWinner", false)
     end
 end
 

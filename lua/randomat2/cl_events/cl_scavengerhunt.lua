@@ -10,6 +10,7 @@ local DrawRoundedBox = draw.RoundedBox
 local GetAllEnts = ents.GetAll
 local PlayerIterator = player.Iterator
 local StringStartsWith = string.StartsWith
+local StringUpper = string.upper
 local SurfaceDrawText = surface.DrawText
 local SurfaceGetTextSize = surface.GetTextSize
 local SurfaceSetFont = surface.SetFont
@@ -76,7 +77,18 @@ local function HandleEntityHint(ent)
     }
 end
 
+local function GetWinner()
+    for _, p in PlayerIterator() do
+        if p:GetNWBool("RdmtScavengerHuntWinner", false) then
+            return p
+        end
+    end
+end
+
 function EVENT:Begin()
+    LANG.AddToLanguage("english", "hilite_win_scavenger_hunt", "{name} WINS")
+    LANG.AddToLanguage("english", "win_scavenger_hunt", "{name} won the scavenger hunt!")
+    LANG.AddToLanguage("english", "ev_win_scavenger_hunt", "{name} won the scavenger hunt!")
     LANG.AddToLanguage("english", "scavengerhunt_title", "Scavenger Hunt")
     LANG.AddToLanguage("english", "scavengerhunt_hint_collect", "Press '{usekey}' to collect")
     LANG.AddToLanguage("english", "scavengerhunt_hint_duplicate", "You already have this")
@@ -117,6 +129,39 @@ function EVENT:Begin()
             ent.TargetIDHint = HandleEntityHint
         end
     end
+
+    ----------------
+    -- WIN CHECKS --
+    ----------------
+
+    self:AddHook("TTTScoringWinTitle", function(wintype, wintitle, title)
+        local winner = GetWinner()
+        if not IsPlayer(winner) then return end
+
+        return { txt = "hilite_win_scavenger_hunt", params = { name =  StringUpper(winner:Nick()) }, c = ROLE_COLORS[winner:GetRole()] }
+    end)
+
+    ------------
+    -- EVENTS --
+    ------------
+
+    self:AddHook("TTTEventFinishText", function(e)
+        local winner = GetWinner()
+        if not IsPlayer(winner) then return end
+
+        return LANG.GetParamTranslation("ev_win_scavenger_hunt", { name = winner:Nick() })
+    end)
+
+    self:AddHook("TTTEventFinishIconText", function(e, win_string, role_string)
+        local winner = GetWinner()
+        if not IsPlayer(winner) then return end
+
+        return win_string, winner:Nick()
+    end)
+
+    -----------------
+    -- EVENT LOGIC --
+    -----------------
 
     self:AddHook("OnEntityCreated", function(ent)
         local entClass = ent:GetClass()
