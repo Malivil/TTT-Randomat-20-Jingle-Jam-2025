@@ -1,15 +1,52 @@
+local draw = draw
 local ents = ents
 local player = player
 local string = string
+local surface = surface
+local table = table
 local timer = timer
 
+local DrawRoundedBox = draw.RoundedBox
 local GetAllEnts = ents.GetAll
 local PlayerIterator = player.Iterator
 local StringStartsWith = string.StartsWith
+local SurfaceDrawText = surface.DrawText
+local SurfaceGetTextSize = surface.GetTextSize
+local SurfaceSetFont = surface.SetFont
+local SurfaceSetTextColor = surface.SetTextColor
+local SurfaceSetTextPos = surface.SetTextPos
+local TableHasValue = table.HasValue
+local TableInsert = table.insert
 
 local EVENT = {}
 
 EVENT.id = "scavengerhunt"
+
+surface.CreateFont("RdmtScavengerHuntTitle", {
+    font = "Tahoma",
+    size = 22,
+    weight = 750,
+    underline = true
+})
+surface.CreateFont("RdmtScavengerHuntList", {
+    font = "Tahoma",
+    size = 18,
+    weight = 750
+})
+surface.CreateFont("RdmtScavengerHuntListComplete", {
+    font = "Tahoma",
+    size = 18,
+    weight = 750,
+    italic = true
+})
+
+net.Receive("RdmtScavengerHuntProps", function()
+    local client = LocalPlayer()
+    if not IsPlayer(client) then return end
+
+    local props = net.ReadTable(true)
+    client.RdmtScavengerHuntTargets = props
+end)
 
 local function HandleEntityHint(ent)
     if not IsValid(ent) then return end
@@ -40,6 +77,7 @@ local function HandleEntityHint(ent)
 end
 
 function EVENT:Begin()
+    LANG.AddToLanguage("english", "scavengerhunt_title", "Scavenger Hunt")
     LANG.AddToLanguage("english", "scavengerhunt_hint_collect", "Press '{usekey}' to collect")
     LANG.AddToLanguage("english", "scavengerhunt_hint_duplicate", "You already have this")
     LANG.AddToLanguage("english", "scavengerhunt_prop_ballon_dog", "Ballon Dog")
@@ -97,7 +135,66 @@ function EVENT:Begin()
         end)
     end)
 
-    -- TODO: Checklist of props to find
+    local client = LocalPlayer()
+
+    net.Receive("RdmtScavengerHuntCollected", function()
+        if not IsPlayer(client) then return end
+
+        local model = net.ReadString()
+
+        -- Sanity check
+        if not SCAVENGER_HUNT:IsHuntTarget(client, model) then return end
+
+        if not client.RdmtScavengerHuntCollected then
+            client.RdmtScavengerHuntCollected = {}
+        end
+
+        local name = SCAVENGER_HUNT:GetModelName(model)
+        TableInsert(client.RdmtScavengerHuntCollected, name)
+        Randomat:PrintMessage(client, MSG_PRINTBOTH, "You collected the '" .. LANG.GetTranslation("scavengerhunt_prop_" .. name) .. "'!")
+    end)
+
+    -- Checklist of props to find
+    self:AddHook("HUDPaint", function()
+        if not IsPlayer(client) then return end
+        if not client.RdmtScavengerHuntTargets then return end
+        if not client:Alive() or client:IsSpec() then return end
+
+        local lineHeight = 20
+        local margin = 8
+        local height = (#client.RdmtScavengerHuntTargets * lineHeight) + (margin * 3)
+        local topPos = (ScrH() / 2) - (height / 2)
+        local leftPos = margin
+
+        -- Calculate title size so we know how big to make the background
+        local text = LANG.GetTranslation("scavengerhunt_title")
+        SurfaceSetFont("RdmtScavengerHuntTitle")
+        local width, titleHeight = SurfaceGetTextSize(text)
+
+        -- Background
+        width = width + (margin * 2)
+        DrawRoundedBox(8, leftPos, topPos, width, height + titleHeight, Color(0, 0, 10, 200))
+
+        -- Title
+        SurfaceSetTextColor(COLOR_WHITE)
+        SurfaceSetTextPos(leftPos + margin, topPos + margin)
+        SurfaceDrawText(text)
+
+        -- Lines
+        for i, p in ipairs(client.RdmtScavengerHuntTargets) do
+            if client.RdmtScavengerHuntCollected and TableHasValue(client.RdmtScavengerHuntCollected, p) then
+                SurfaceSetTextColor(COLOR_GREEN)
+                SurfaceSetFont("RdmtScavengerHuntListComplete")
+            else
+                SurfaceSetTextColor(COLOR_WHITE)
+                SurfaceSetFont("RdmtScavengerHuntList")
+            end
+            SurfaceSetTextPos(leftPos + margin, topPos + margin + titleHeight + margin + ((i - 1) * lineHeight))
+
+            text = LANG.GetTranslation("scavengerhunt_prop_" .. p)
+            SurfaceDrawText(text)
+        end
+    end)
 end
 
 function EVENT:End()

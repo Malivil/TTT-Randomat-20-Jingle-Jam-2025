@@ -8,7 +8,7 @@ SCAVENGER_HUNT = {
     props = {
         ballon_dog = "models/balloons/balloon_dog.mdl",
         binder = { "models/props_lab/binderblue.mdl", "models/props_lab/binderbluelabel.mdl", "models/props_lab/bindergraylabel01a.mdl", "models/props_lab/bindergraylabel01b.mdl", "models/props_lab/bindergreen.mdl", "models/props_lab/bindergreenlabel.mdl", "models/props_lab/binderredlabel.mdl" },
-        Bucket = "models/props_junk/metalgascan.mdl",
+        bucket = "models/props_junk/metalgascan.mdl",
         burger = "models/food/burger.mdl",
         cash_register = "models/props_c17/cashregister01a.mdl",
         clipboard = "models/props_lab/clipboard.mdl",
@@ -64,24 +64,12 @@ end
 
 function SCAVENGER_HUNT:IsHuntTarget(ply, model)
     if not ply.RdmtScavengerHuntTargets then return false end
-    return TableHasValue(ply.RdmtScavengerHuntTargets, model)
+    local name = self:GetModelName(model)
+    return TableHasValue(ply.RdmtScavengerHuntTargets, name)
 end
 
 function SCAVENGER_HUNT:IsCollected(ply, model)
     if not ply.RdmtScavengerHuntCollected then return false end
-    return TableHasValue(ply.RdmtScavengerHuntCollected, model)
-end
-
-function SCAVENGER_HUNT:Collect(ply, ent, model)
-    if not self:IsHuntTarget(ply, model) then return end
-
-    if not ply.RdmtScavengerHuntCollected then
-        ply.RdmtScavengerHuntCollected = {}
-    end
-    TableInsert(ply.RdmtScavengerHuntCollected, model)
-    if SERVER then
-        SafeRemoveEntity(ent)
-    else
-        Randomat:PrintMessage(ply, MSG_PRINTBOTH, "You collected the '" .. LANG.GetTranslation("scavengerhunt_prop_" .. self:GetModelName(model)) .. "'!")
-    end
+    local name = self:GetModelName(model)
+    return TableHasValue(ply.RdmtScavengerHuntCollected, name)
 end
