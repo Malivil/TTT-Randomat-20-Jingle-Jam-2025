@@ -1,8 +1,10 @@
 local ents = ents
+local player = player
 local string = string
 local timer = timer
 
 local GetAllEnts = ents.GetAll
+local PlayerIterator = player.Iterator
 local StringStartsWith = string.StartsWith
 
 local EVENT = {}

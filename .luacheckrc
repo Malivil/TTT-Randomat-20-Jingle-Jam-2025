@@ -1131,9 +1131,10 @@ globals = {
     "ROLE_DETECTOCLOWN",
 
     -- JJ2025 Randomat
+    "HOMEALONE",
     "ROLE_KEVIN",
+    "SCAVENGER_HUNT",
     "WIN_KEVIN",
-    "HOMEALONE"
 }
 std = {
     globals = {
