@@ -1,6 +1,8 @@
 local pairs = pairs
+local string = string
 local table = table
 
+local StringLower = string.lower
 local TableHasValue = table.HasValue
 local TableInsert = table.insert
 
@@ -35,11 +37,33 @@ SCAVENGER_HUNT = {
     models = {}
 }
 
+-- Roll our own to do case insensitive checks
+local function GetValueKey(tbl, val)
+    val = StringLower(val)
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            local foundKey = GetValueKey(v, val)
+            if foundKey then
+                return k
+            end
+        else
+            v = StringLower(v)
+            if v == val then
+                return k
+            end
+        end
+    end
+end
+
 local function FlattenTableValues(src, dst)
     for _, m in pairs(src) do
         if type(m) == "table" then
             FlattenTableValues(m, dst)
-        elseif not TableHasValue(dst, m) then
+            continue
+        end
+
+        m = StringLower(m)
+        if not TableHasValue(dst, m) then
             TableInsert(dst, m)
         end
     end
@@ -47,19 +71,11 @@ end
 FlattenTableValues(SCAVENGER_HUNT.props, SCAVENGER_HUNT.models)
 
 function SCAVENGER_HUNT:IsPossibleModel(model)
-    return TableHasValue(self.models, model)
+    return TableHasValue(self.models, StringLower(model))
 end
 
 function SCAVENGER_HUNT:GetModelName(model)
-    for k, m in pairs(self.props) do
-        if type(m) == "table" then
-            if TableHasValue(m, model) then
-                return k
-            end
-        elseif m == model then
-            return k
-        end
-    end
+    return GetValueKey(self.props, model)
 end
 
 function SCAVENGER_HUNT:IsHuntTarget(ply, model)
