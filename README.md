@@ -53,6 +53,18 @@ _ttt_randomat_columbo_ - Default: 1 - Whether this event is enabled.\
 _ttt_randomat_columbo_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
 _ttt_randomat_columbo_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.
 
+## Scavenger Hunt
+_Contributed By_: Malivil\
+Find the props scattered around the map, first to get them all wins!.
+\
+\
+**ConVars**
+\
+_ttt_randomat_scavengerhunt_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_scavengerhunt_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_scavengerhunt_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_scavengerhunt_count_ - Default: 10 - The number of props a player has to find to win.
+
 ## Trampoline
 _Suggested By_: spooky worm\
 Hitting the ground near other players causes them to launch into the air.
