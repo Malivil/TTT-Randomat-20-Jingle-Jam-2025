@@ -83,12 +83,10 @@ function EVENT:Begin()
         local kevin_alive = false
         local other_alive = false
         for _, p in ipairs(self:GetAlivePlayers()) do
-            if p:IsActive() then
-                if p:IsRole(ROLE_KEVIN) then
-                    kevin_alive = true
-                elseif not p:ShouldActLikeJester() and not ROLE_HAS_PASSIVE_WIN[p:GetRole()] then
-                    other_alive = true
-                end
+            if p:IsRole(ROLE_KEVIN) then
+                kevin_alive = true
+            elseif not p:ShouldActLikeJester() and not ROLE_HAS_PASSIVE_WIN[p:GetRole()] then
+                other_alive = true
             end
         end
 
