@@ -166,6 +166,8 @@ function EVENT:Begin()
         prop:SetModelScale(1)
         local pos, posKey = TableRandom(entsPos)
         TableRemove(entsPos, posKey)
+        -- Bump it up a bit to avoid overlapping, just in case
+        pos.z = pos.z + 15
         prop:SetPos(FindRespawnLocation(pos) or pos)
         prop:Spawn()
         prop:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE)
