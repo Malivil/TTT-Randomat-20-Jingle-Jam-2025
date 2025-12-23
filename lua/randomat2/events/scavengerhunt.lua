@@ -5,12 +5,16 @@ local string = string
 local table = table
 local timer = timer
 
+local EntsCreate = ents.Create
 local GetAllEnts = ents.GetAll
 local PlayerIterator = player.Iterator
 local StringStartsWith = string.StartsWith
+local TableAdd = table.Add
+local TableCopy = table.Copy
 local TableHasValue = table.HasValue
 local TableInsert = table.insert
 local TableRandom = table.Random
+local TableRemove = table.remove
 
 util.AddNetworkString("RdmtScavengerHuntProps")
 util.AddNetworkString("RdmtScavengerHuntCollected")
@@ -134,7 +138,44 @@ function EVENT:Begin()
         net.Send(p)
     end
 
-    -- TODO: Spawn chosen props around the map
+    local entsPos = {}
+    for _, ent in ipairs(ents.FindByClass("item_*")) do
+        if IsValid(ent:GetParent()) then continue end
+        TableInsert(entsPos, ent:GetPos())
+    end
+    for _, ent in ipairs(ents.FindByClass("weapon_*")) do
+        if IsValid(ent:GetParent()) then continue end
+        TableInsert(entsPos, ent:GetPos())
+    end
+
+    -- Make sure we have enough positions
+    while #entsPos < #chosenProps do
+        TableAdd(entsPos, TableCopy(entsPos))
+    end
+
+    -- Spawn chosen props around the map
+    for _, p in ipairs(chosenProps) do
+        local model = SCAVENGER_HUNT.props[p]
+        if type(model) == "table" then
+            model = TableRandom(model)
+        end
+
+        local prop = EntsCreate("prop_physics")
+        prop:SetModel(model)
+        prop:PhysicsInit(SOLID_VPHYSICS)
+        prop:SetModelScale(1)
+        local pos, posKey = TableRandom(entsPos)
+        print(model, pos)
+        TableRemove(entsPos, posKey)
+        prop:SetPos(FindRespawnLocation(pos) or pos)
+        prop:Spawn()
+        prop:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+
+        local phys = prop:GetPhysicsObject()
+        if IsValid(phys) then
+            phys:Wake()
+        end
+    end
 end
 
 function EVENT:End()
