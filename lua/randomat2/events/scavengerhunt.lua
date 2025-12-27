@@ -6,6 +6,7 @@ local table = table
 local timer = timer
 
 local CreateEntity = ents.Create
+local EntsFindByClass = ents.FindByClass
 local GetAllEnts = ents.GetAll
 local PlayerIterator = player.Iterator
 local StringStartsWith = string.StartsWith
@@ -139,11 +140,11 @@ function EVENT:Begin()
     end
 
     local entsPos = {}
-    for _, ent in ipairs(ents.FindByClass("item_*")) do
+    for _, ent in ipairs(EntsFindByClass("item_*")) do
         if IsValid(ent:GetParent()) then continue end
         TableInsert(entsPos, ent:GetPos())
     end
-    for _, ent in ipairs(ents.FindByClass("weapon_*")) do
+    for _, ent in ipairs(EntsFindByClass("weapon_*")) do
         if IsValid(ent:GetParent()) then continue end
         TableInsert(entsPos, ent:GetPos())
     end
