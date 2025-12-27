@@ -53,6 +53,21 @@ _ttt_randomat_columbo_ - Default: 1 - Whether this event is enabled.\
 _ttt_randomat_columbo_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
 _ttt_randomat_columbo_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.
 
+## Prop Fight
+_Suggested By_: esoterica\
+The only way to damage other players is by throwing props... PROP FIGHT!
+\
+\
+**ConVars**
+\
+_ttt_randomat_propfight_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_propfight_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_propfight_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_propfight_count_ - Default: 10 - The number of props to spawn around the map.\
+_randomat_propfight_damage_mult_ - Default: 1 - The damage multiplier for prop damage (1 = 1x = 100%, 1.25 = 1.25x = 125%).\
+_randomat_propfight_damage_min_ - Default: 15 - The minimum damage a prop impact can do.\
+_randomat_propfight_weight_mult_ - Default: 10 - The multiplier to use on the magneto-stick's maximum carry weight.
+
 ## Scavenger Hunt
 _Contributed By_: Malivil\
 Find the props scattered around the map, first to get them all wins!.
