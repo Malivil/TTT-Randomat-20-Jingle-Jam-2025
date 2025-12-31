@@ -11,12 +11,12 @@ local TableRandom = table.Random
 
 local EVENT = {}
 
-EVENT.Title = "Cha-Cha Slide"
+EVENT.Title = "Moveracer"
 EVENT.Description = "Press the movement buttons in the order given before time runs out OR DIE!"
-EVENT.id = "chachaslide"
+EVENT.id = "moveracer"
 EVENT.Categories = {"gamemode", "largeimpact"}
 
-CreateConVar("randomat_chachaslide_timer", 15, FCVAR_NONE, "The amount of time players have to press each sequence", 5, 60)
+CreateConVar("randomat_moveracer_timer", 15, FCVAR_NONE, "The amount of time players have to press each sequence", 5, 60)
 
 local startingLength = 4
 local currentLength = nil
@@ -49,7 +49,7 @@ function EVENT:ChooseSequence(first, quiz_time)
 end
 
 function EVENT:BeforeEventTrigger(ply, options, ...)
-    local time = GetConVar("randomat_chachaslide_timer"):GetInt()
+    local time = GetConVar("randomat_moveracer_timer"):GetInt()
     local description = "Press the movement buttons in the order given within " .. time .. " seconds OR DIE!"
     self.Description = description
 end
@@ -106,7 +106,7 @@ function EVENT:Begin()
         end
     end)
 
-    local time = GetConVar("randomat_chachaslide_timer"):GetInt()
+    local time = GetConVar("randomat_moveracer_timer"):GetInt()
     timer.Create("RdmtTypeRacerDelay", time, 1, function()
         chosen = self:ChooseSequence(true, time)
 
@@ -127,8 +127,8 @@ function EVENT:Begin()
 end
 
 function EVENT:End()
-    timer.Remove("RdmtChaChaSlideDelay")
-    timer.Remove("RdmtChaChaSlideTimer")
+    timer.Remove("RdmtMoveracerDelay")
+    timer.Remove("RdmtMoveracerTimer")
 end
 
 -- "Secret" causes this event to essentially just kill everyone, since they can't see the prompts

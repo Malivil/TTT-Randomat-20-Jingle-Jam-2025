@@ -3,18 +3,6 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 
 # Events
 
-## Cha-Cha Slide
-_Suggested By_: spooky worm\
-Press the movement buttons in the order given before time runs out OR DIE!
-\
-\
-**ConVars**
-\
-_ttt_randomat_chachaslide_ - Default: 1 - Whether this event is enabled.\
-_ttt_randomat_chachaslide_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
-_ttt_randomat_chachaslide_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
-_randomat_chachaslide_timer__ - Default: 15 - The amount of time players have to press each sequence.
-
 ## Heating Up
 _Suggested By_: Corvatile\
 Keep out of the rising lava or risk burns!.
@@ -52,6 +40,18 @@ The detective can no longer take or deal damage, but traitors win when all non-d
 _ttt_randomat_columbo_ - Default: 1 - Whether this event is enabled.\
 _ttt_randomat_columbo_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
 _ttt_randomat_columbo_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.
+
+## Moveracer
+_Suggested By_: spooky worm\
+Press the movement buttons in the order given before time runs out OR DIE!
+\
+\
+**ConVars**
+\
+_ttt_randomat_moveracer_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_moveracer_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_moveracer_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_moveracer_timer__ - Default: 15 - The amount of time players have to press each sequence.
 
 ## Prop Fight
 _Suggested By_: esoterica\
