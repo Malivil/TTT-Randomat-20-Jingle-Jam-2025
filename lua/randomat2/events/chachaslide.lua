@@ -1,3 +1,9 @@
+local ipairs = ipairs
+local player = player
+local timer = timer
+
+local PlayerIterator = player.Iterator
+
 local EVENT = {}
 
 EVENT.Title = "This is something new..."
@@ -7,22 +13,25 @@ EVENT.id = "chachaslide"
 local beatLength = 60/125
 
 local function Clap(owner)
-    for _, ply in pairs(owner:GetAlivePlayers(false)) do
-        if ply:GetActiveWeapon():IsValid() then
-            ply:GetActiveWeapon():PrimaryAttack()
-        end
+    for _, ply in ipairs(owner:GetAlivePlayers()) do
+        if not ply.GetActiveWeapon then continue end
+
+        local weap = ply:GetActiveWeapon()
+        if not IsValid(weap) or not wep.PrimaryAttack then continue end
+
+        wep:PrimaryAttack()
     end
 end
 
 local function Hop(owner)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:SetGravity(1.3)
         ply:ConCommand("+jump")
     end
 
     timer.Simple(0.2, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:SetGravity(1)
             ply:ConCommand("-jump")
         end
@@ -30,79 +39,79 @@ local function Hop(owner)
 end
 
 local function Left(owner, length)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveleft")
     end
 
     timer.Simple(length * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
         end
     end)
 end
 
 local function Right(owner, length)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveright")
     end
 
     timer.Simple(length * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
         end
     end)
 end
 
 local function Back(owner, length)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+back")
     end
 
     timer.Simple(length * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-back")
         end
     end)
 end
 
 local function Freeze(owner, length)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:Freeze(true)
     end
 
     timer.Simple(length * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:Freeze(false)
         end
     end)
 end
 
 local function Crouch(owner, length)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+duck")
     end
 
     timer.Simple(length * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-duck")
         end
     end)
 end
 
 local function Grow(owner, length)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:SetViewOffset(Vector(0, 0, 96))
         ply:SetViewOffsetDucked(Vector(0, 0, 48))
     end
 
     timer.Simple(length * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:SetViewOffset(Vector(0, 0, 64))
             ply:SetViewOffsetDucked(Vector(0, 0, 32))
         end
@@ -110,14 +119,14 @@ local function Grow(owner, length)
 end
 
 local function CrossLeft(owner)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveleft")
         ply:ConCommand("+forward")
     end
 
     timer.Simple(0.5 * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-forward")
             ply:ConCommand("+moveright")
@@ -126,7 +135,7 @@ local function CrossLeft(owner)
     end)
 
     timer.Simple(1.5 * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-back")
             ply:ConCommand("+moveleft")
@@ -135,7 +144,7 @@ local function CrossLeft(owner)
     end)
 
     timer.Simple(2 * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-forward")
         end
@@ -143,14 +152,14 @@ local function CrossLeft(owner)
 end
 
 local function CrossRight(owner)
-    local plys = owner:GetAlivePlayers(false)
-    for _, ply in pairs(plys) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveright")
         ply:ConCommand("+forward")
     end
 
     timer.Simple(0.5 * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-forward")
             ply:ConCommand("+moveleft")
@@ -159,7 +168,7 @@ local function CrossRight(owner)
     end)
 
     timer.Simple(1.5 * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-back")
             ply:ConCommand("+moveright")
@@ -168,7 +177,7 @@ local function CrossRight(owner)
     end)
 
     timer.Simple(2 * beatLength, function()
-        for _, ply in pairs(plys) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-forward")
         end
@@ -176,13 +185,13 @@ local function CrossRight(owner)
 end
 
 local function Dance(owner)
-    for _, ply in pairs(owner:GetAlivePlayers(false)) do
+    for _, ply in ipairs(owner:GetAlivePlayers()) do
         ply:SendLua("RunConsoleCommand(\"act\", \"dance\")")
     end
 end
 
 local function Reverse(owner)
-    for _, ply in pairs(owner:GetAlivePlayers(false)) do
+    for _, ply in ipairs(owner:GetAlivePlayers()) do
         local eyeang = ply:EyeAngles()
         eyeang.yaw = eyeang.yaw + 180
         if eyeang.yaw > 180 then
@@ -193,16 +202,18 @@ local function Reverse(owner)
 end
 
 local function Kill(owner)
-    hook.Add("TTTCheckForWin", "chachaslideend", function()
-        return WIN_JESTER
-    end)
-    for _, ply in pairs(owner:GetAlivePlayers(false)) do
+    -- Stop the win checks so someone else doesn't steal this player's win
+    StopWinChecks()
+    -- Delay the actual end for a second so the state has a chance to propagate
+    timer.Simple(1, function() EndRound(WIN_JESTER) end)
+
+    for _, ply in ipairs(owner:GetAlivePlayers()) do
         ply:Kill()
     end
 end
 
 function EVENT:Begin()
-    for _, ply in pairs(player.GetAll()) do
+    for _, ply in PlayerIterator() do
         ply:SendLua("surface.PlaySound(\"chachaslide.wav\")")
     end
 
@@ -494,9 +505,7 @@ function EVENT:End()
         end
     end
 
-    hook.Remove( "TTTCheckForWin", "chachaslideend" )
-
-    for _, ply in pairs(player.GetAll()) do
+    for _, ply in ipairs(player.GetAll()) do
         ply:ConCommand("-jump")
         ply:ConCommand("-duck")
         ply:ConCommand("-moveleft")
