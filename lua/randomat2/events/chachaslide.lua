@@ -16,8 +16,8 @@ local function Clap(owner)
     for _, ply in ipairs(owner:GetAlivePlayers()) do
         if not ply.GetActiveWeapon then continue end
 
-        local weap = ply:GetActiveWeapon()
-        if not IsValid(weap) or not wep.PrimaryAttack then continue end
+        local wep = ply:GetActiveWeapon()
+        if not IsValid(wep) or not wep.PrimaryAttack then continue end
 
         wep:PrimaryAttack()
     end
