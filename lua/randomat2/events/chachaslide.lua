@@ -9,6 +9,7 @@ local EVENT = {}
 EVENT.Title = "This is something new..."
 EVENT.Description = "Forces all players to dance to the Cha-Cha Slide"
 EVENT.id = "chachaslide"
+EVENT.Enabled = false
 
 local beatLength = 60/125
 
@@ -495,6 +496,7 @@ function EVENT:Begin()
     -- Oh yeah
     -- I'm outta here y'all
     -- Peace
+    -- TODO: Wrap this behind a convar
     timer.Create("ChaChaSlide148", 475.2 * beatLength, 1, function() Kill(self) end)
 end
 

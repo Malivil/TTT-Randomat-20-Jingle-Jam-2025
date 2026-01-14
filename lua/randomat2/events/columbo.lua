@@ -27,6 +27,7 @@ function EVENT:Begin()
     local columbo = self:GetAliveDetective()
 
     timer.Simple(0.1, function()
+        -- TODO: Set player model
         Randomat:PrintMessage(columbo, MSG_PRINTBOTH, "You are now Columbo, the shrewd and exceptionally observant homicide detective")
         Randomat:PrintMessage(columbo, MSG_PRINTBOTH, "You cannot take or deal damage and must instead use your detective skills to help your team prevail")
     end)
