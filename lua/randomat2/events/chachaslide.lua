@@ -9,7 +9,7 @@ local EVENT = {}
 EVENT.Title = "This is something new..."
 EVENT.Description = "Forces all players to dance to the Cha-Cha Slide"
 EVENT.id = "chachaslide"
-EVENT.Enabled = false
+EVENT.IsEnabled = false
 
 local beatLength = 60/125
 
