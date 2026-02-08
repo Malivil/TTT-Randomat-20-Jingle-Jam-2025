@@ -16,7 +16,7 @@ EVENT.Description = "Doppelgangers spawn all around the map and dance randomly"
 EVENT.id = "dancingdoppelgangers"
 EVENT.Categories = {"smallimpact", "entityspawn", "fun"}
 
-CreateConVar("randomat_dancingdoppelgangers_count", 1, FCVAR_NONE, "How many clones should be spawned for each player", 1, 5)
+CreateConVar("randomat_dancingdoppelgangers_count", 1, FCVAR_NONE, "How many clones should be spawned for each player", 1, 3)
 
 local function CreateClone(ply, pos, ang)
     local clone = CreateEnt("ttt_randomat_jj2025_clone")
@@ -61,9 +61,12 @@ function EVENT:Begin()
     local spawnEnts = GetSpawnEnts(true)
     local plys = self:GetAlivePlayers()
     for _, p in ipairs(plys) do
-        for i=1, count do
+        local i = 1
+        local attempts = 0
+        while i <= count do
             -- Get a random spawn position
             local pos = spawnEnts[MathRandom(#spawnEnts)]:GetPos()
+            pos = FindRespawnLocation(pos) or pos
 
             -- Make sure it's not too close to a player
             local skip = false
@@ -86,12 +89,16 @@ function EVENT:Begin()
 
             -- Retry this clone with a different position
             if skip then
-                i = i - 1
-                continue
+                attempts = attempts + 1
+                -- Try at most 5 times per clone
+                if attempts <= 5 then
+                    continue
+                end
             end
 
             local ang = p:GetAngles()
             CreateClone(p, pos, ang)
+            i = i + 1
         end
     end
 end
