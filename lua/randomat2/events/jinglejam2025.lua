@@ -79,7 +79,7 @@ function EVENT:Begin()
         local entAngles = e:GetAngles()
         e:Remove()
 
-        local prop = CreateEntity("randomat_jj2025_ammo")
+        local prop = CreateEntity("ttt_randomat_jj2025_ammo")
         prop:SetModel(propModel)
         prop:SetPos(entPos)
         prop:SetAngles(entAngles)
@@ -112,7 +112,7 @@ function EVENT:Begin()
         local tr = ply:GetEyeTrace()
         local target = tr.Entity
         if not IsValid(target) then return end
-        if target:GetClass() ~= "randomat_jj2025_ammo" then return end
+        if target:GetClass() ~= "ttt_randomat_jj2025_ammo" then return end
 
         target:Remove()
 
@@ -132,7 +132,7 @@ function EVENT:Begin()
 end
 
 function EVENT:End()
-    for _, e in ipairs(EntsFindByClass("randomat_jj2025_ammo")) do
+    for _, e in ipairs(EntsFindByClass("ttt_randomat_jj2025_ammo")) do
         if not IsValid(e) then continue end
 
         local entPos = e:GetPos()
