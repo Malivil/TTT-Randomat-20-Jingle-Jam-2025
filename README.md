@@ -3,9 +3,21 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 
 # Events
 
+## Dancing Doppelgangers
+_Suggested By_: Spaaz\
+Doppelgangers spawn all around the map and dance randomly.
+\
+\
+**ConVars**
+\
+_ttt_randomat_dancingdoppelgangers_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_dancingdoppelgangers_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_dancingdoppelgangers_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_dancingdoppelgangers_count_ - Default: 1 - How many clones should be spawned for each player.
+
 ## Heating Up
 _Suggested By_: Corvatile\
-Keep out of the rising lava or risk burns!.
+Keep out of the rising lava or risk burns!
 \
 \
 **ConVars**
@@ -108,3 +120,4 @@ _randomat_trampoline_min_speed_ - Default: 200 - The minimum fall speed a player
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
 - Nick and Spaaz for the idea for the "Jingle Jam 2025" event
+- Spaaz for some of the code used in the "Dancing Doppelgangers" event

@@ -29,6 +29,7 @@ local danceMusic = {
 ENT.FakeWep = nil
 
 function ENT:Initialize()
+    self:SetSolid(SOLID_BBOX)
     self:SetCollisionBounds(Vector(-16, -16, 0), Vector(16, 16, 84))
 end
 

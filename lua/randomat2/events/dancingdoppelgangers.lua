@@ -12,9 +12,9 @@ util.AddNetworkString("RdmtDancingDoppelgangersCreated")
 local EVENT = {}
 
 EVENT.Title = "Dancing Doppelgangers"
-EVENT.Description = ""
+EVENT.Description = "Doppelgangers spawn all around the map and dance randomly"
 EVENT.id = "dancingdoppelgangers"
-EVENT.Categories = {}
+EVENT.Categories = {"smallimpact", "entityspawn", "fun"}
 
 CreateConVar("randomat_dancingdoppelgangers_count", 1, FCVAR_NONE, "How many clones should be spawned for each player", 1, 5)
 
@@ -59,11 +59,37 @@ end
 function EVENT:Begin()
     local count = GetConVar("randomat_dancingdoppelgangers_count"):GetInt()
     local spawnEnts = GetSpawnEnts(true)
-    for _, p in ipairs(self:GetAlivePlayers()) do
+    local plys = self:GetAlivePlayers()
+    for _, p in ipairs(plys) do
         for i=1, count do
             -- Get a random spawn position
             local pos = spawnEnts[MathRandom(#spawnEnts)]:GetPos()
-            pos = FindRespawnLocation(pos) or pos
+
+            -- Make sure it's not too close to a player
+            local skip = false
+            for _, pl in ipairs(plys) do
+                if pl:GetPos():DistToSqr(pos) < 36 then
+                    skip = true
+                    break
+                end
+            end
+
+            -- Or another clone
+            if not skip then
+                for _, e in ipairs(EntsFindByClass("ttt_randomat_jj2025_clone")) do
+                    if e:GetPos():DistToSqr(pos) < 36 then
+                        skip = true
+                        break
+                    end
+                end
+            end
+
+            -- Retry this clone with a different position
+            if skip then
+                i = i - 1
+                continue
+            end
+
             local ang = p:GetAngles()
             CreateClone(p, pos, ang)
         end
