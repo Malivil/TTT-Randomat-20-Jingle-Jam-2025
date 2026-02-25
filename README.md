@@ -62,7 +62,8 @@ The detective can no longer take or deal damage, but traitors win when all non-d
 \
 _ttt_randomat_columbo_ - Default: 1 - Whether this event is enabled.\
 _ttt_randomat_columbo_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
-_ttt_randomat_columbo_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.
+_ttt_randomat_columbo_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_columbo_multiple_mode_ - Default: 1 - How to handle there being multiple living detectives. 0 - Don't allow this event to run. 1 - Choose one randomly. 2 - Make them all Columbo.
 
 ## Moveracer
 _Suggested By_: spooky worm\
