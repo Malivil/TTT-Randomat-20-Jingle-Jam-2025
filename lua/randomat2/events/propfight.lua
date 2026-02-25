@@ -196,6 +196,8 @@ function EVENT:Condition()
     for _, p in PlayerIterator() do
         if Randomat:ShouldActLikeJester(p) then return false end
     end
+
+    return true
 end
 
 function EVENT:GetConVars()
