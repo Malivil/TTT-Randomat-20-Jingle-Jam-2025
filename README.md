@@ -54,7 +54,7 @@ _ttt_randomat_jinglejam2025_min_players_ - Default: 0 - The minimum number of pl
 _ttt_randomat_jinglejam2025_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.
 
 ## Just One More Thing... (aka Columbo)
-_Suggested By_: esoterica\
+_Suggested By and Code Contributed By_: esoterica\
 The detective can no longer take or deal damage, but traitors win when all non-detective innocents are dead.
 \
 \
