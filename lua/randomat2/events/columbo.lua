@@ -94,6 +94,8 @@ function EVENT:Condition()
             return false
         end
     end
+
+    return true
 end
 
 Randomat:register(EVENT)
