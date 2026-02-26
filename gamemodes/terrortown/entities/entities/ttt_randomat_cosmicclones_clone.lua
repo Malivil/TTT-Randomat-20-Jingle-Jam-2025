@@ -23,10 +23,12 @@ if SERVER then
     local coroutine = coroutine
     local ents = ents
     local math = math
+    local table = table
     local timer = timer
 
     local EntsCreate = ents.Create
     local MathCeil = math.ceil
+    local TableInsert = table.insert
 
     ENT.PositionTolerance = 0
     ENT.FakeWep           = nil
@@ -140,57 +142,65 @@ if SERVER then
         self.FakeWep = nil
     end
 
+    function ENT:UpdateActivity(act)
+        act = act or ACT_RESET
+        if self:GetActivity() ~= act then
+            self:StartActivity(act)
+        end
+    end
+
+    function ENT:UpdateWeaponModel(model)
+        if not model then return end
+
+        if not self.FakeWep then
+            local attachment
+            local lookup = self:LookupAttachment("anim_attachment_RH")
+            if lookup == 0 then
+                attachment = { Pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 5), Ang = self:GetForward():Angle() + Angle(20, 0, 0) }
+            else
+                attachment = self:GetAttachment(lookup)
+            end
+
+            -- Create the Fake weapon
+            self.FakeWep = EntsCreate("base_anim")
+            self.FakeWep:SetOwner(self)
+            self.FakeWep:AddEffects(EF_BONEMERGE)
+            self.FakeWep:SetMoveType(MOVETYPE_NONE)
+            self.FakeWep:SetPos(attachment.Pos)
+            self.FakeWep:SetAngles(attachment.Ang)
+            self.FakeWep:SetParent(self)
+        end
+
+        if self.FakeWep:GetModel() ~= model then
+            self.FakeWep:SetModel(model)
+        end
+    end
+
     function ENT:RunBehaviour()
         local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
         while (true) do
-            local time, mvData = next(self.MoveData)
+            local idx, mvData = next(self.MoveData)
             -- Sanity check
-            if not time then
+            if not mvData then
                 coroutine.yield()
                 continue
             end
 
             -- Only do the actions after the appropriate delay
-            if (CurTime() - time) < delay then
+            if (CurTime() - mvData.time) < delay then
                 coroutine.yield()
                 continue
             end
 
-            self.loco:FaceTowards(mvData.pos)
-            -- TODO: self.loco:SetAcceleration(???)
+            self.MoveData[idx] = nil
 
-            self.MoveData[time] = nil
-
-            if mvData.weapon.model then
-                if not self.FakeWep then
-                    local attachment
-                    local lookup = self:LookupAttachment("anim_attachment_RH")
-                    if lookup == 0 then
-                        attachment = { Pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 5), Ang = self:GetForward():Angle() + Angle(20, 0, 0) }
-                    else
-                        attachment = self:GetAttachment(lookup)
-                    end
-
-                    -- Create the Fake weapon
-                    self.FakeWep = EntsCreate("base_anim")
-                    self.FakeWep:SetOwner(self)
-                    self.FakeWep:AddEffects(EF_BONEMERGE)
-                    self.FakeWep:SetMoveType(MOVETYPE_NONE)
-                    self.FakeWep:SetPos(attachment.Pos)
-                    self.FakeWep:SetAngles(attachment.Ang)
-                    self.FakeWep:SetParent(self)
-                end
-
-                if self.FakeWep:GetModel() ~= mvData.weapon.model then
-                    self.FakeWep:SetModel(mvData.weapon.model)
-                end
-            end
-
-            -- TODO: Not sure this is right
-            self:SetPoseParameter("aim_yaw", mvData.ang.yaw)
-            self:SetPoseParameter("aim_pitch", mvData.ang.pitch)
+            self:UpdateWeaponModel(mvData.weapon.model)
+            self:SetPoseParameter("aim_yaw", mvData.view.yaw)
+            self:SetPoseParameter("aim_pitch", mvData.view.pitch)
+            self:SetAngles(mvData.ang)
 
             -- If we're close enough to the position, just idle for a bit
+            --print(self:GetRangeSquaredTo(mvData.pos))
             if self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance then
                 local act
                 if mvData.crouching then
@@ -198,7 +208,7 @@ if SERVER then
                 else
                     act = IdleActIndex[mvData.weapon.holdType]
                 end
-                self:StartActivity(act or ACT_RESET)
+                self:UpdateActivity(act)
             else
                 local act
                 if mvData.crouching then
@@ -210,18 +220,17 @@ if SERVER then
                 end
 
                 self.loco:SetDesiredSpeed(mvData.speed)
-                self:StartActivity(act or ACT_RESET)
-                -- TODO: Don't know if this is right
+                self:UpdateActivity(act)
                 local result = self:MoveToPos(mvData.pos, {
                     lookahead = 100,
-                    tolerance = 0,
-                    draw = false,
-                    maxage = 0.1,
-                    repath = 0.1
+                    tolerance = 20,
+                    draw = true,
+                    maxage = 30,
+                    repath = 10000
                 })
 
                 -- If they are stuck, try teleporting them since these should be small increments anyway
-                if result == "stuck" then
+                if result ~= "ok" then
                     self:SetPos(mvData.pos)
                 end
             end
@@ -230,8 +239,27 @@ if SERVER then
         end
     end
 
-    function ENT:AddMoveData(curTime, mvData)
-        self.MoveData[curTime] = mvData
+    ENT.LastAdded = nil
+    function ENT:AddMoveData(mvData)
+        -- Ignore duplicates
+        if self.LastAdded and
+            self.LastAdded.pos:IsEqualTol(mvData.pos, 0) and
+            self.LastAdded.ang:IsEqualTol(mvData.ang, 0) and
+            (self.LastAdded.crouching == mvData.crouching) and
+            (self.LastAdded.walking == mvData.walking) and
+            (self.LastAdded.speed == mvData.speed) and
+            (self.LastAdded.weapon.model == mvData.weapon.model) and
+            (self.LastAdded.weapon.holdType == mvData.weapon.holdType) then
+            return
+        end
+
+        -- If this is our first entry, set the initial weapon model
+        if not self.LastAdded then
+            self:UpdateWeaponModel(mvData.weapon.model)
+        end
+
+        self.LastAdded = mvData
+        TableInsert(self.MoveData, mvData)
     end
 
     function ENT:OnContact(ent)
