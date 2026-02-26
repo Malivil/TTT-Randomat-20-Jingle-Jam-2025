@@ -28,7 +28,7 @@ local function CreateClone(ply, pos, ang)
     end
     clone:SetColor(dark_red)
     clone:SetMaterial("models/shiny")
-    clone.RdmtCosmicCloneTarget = ply:SteamID64()
+    clone.CloneOf = ply
     clone:Spawn()
     clone:Activate()
 
@@ -39,24 +39,49 @@ local mv_start = {}
 function EVENT:Begin()
     local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
 
+    -- The clones are invincible
+    self:AddHook("EntityTakeDamage", function(target, dmginfo)
+        if not IsValid(target) then return end
+        if target:GetClass() == "ttt_randomat_cosmicclones_clone" then
+            dmginfo:SetDamage(0)
+            return true
+        end
+    end)
+
     self:AddHook("SetupMove", function(ply, mv, cmd)
         local curTime = CurTime()
         local sid64 = ply:SteamID64()
 
-        -- TODO: What do we need from this?
-        local activeWep = ply:GetActiveWeapon()
+        local speed = ply:GetWalkSpeed()
+        if ply:IsWalking() then
+            speed = ply:GetSlowWalkSpeed()
+        end
+        if ply:Crouching() then
+            speed = speed * ply:GetCrouchedWalkSpeed()
+        end
+
+        -- TODO: What else do we need from this?
+        -- TODO: Jumping?
         local mvData = {
-            btns = mv:GetButtons(),
-            ang = mv:GetMoveAngles(),
+            pos = ply:GetPos(),
+            ang = ply:GetAngles(),
+            crouching = ply:Crouching(),
+            walking = ply:IsWalking(),
+            speed = speed,
+            weapon = {}
+            --view = cmd:GetViewAngles(),
+            --btns = mv:GetButtons(),
+            --mvAng = mv:GetMoveAngles(),
             --fwd = mv:GetForwardSpeed(),
             --side = mv:GetSideSpeed(),
             --up = mv:GetUpSpeed(),
-            view = cmd:GetViewAngles(),
-            weapon = {
-                model = activeWep:GetModel(),
-                holdType = activeWep:GetHoldType()
-            }
         }
+
+        local activeWep = ply:GetActiveWeapon()
+        if IsValid(activeWep) and activeWep ~= NULL then
+            mvData.weapon.model = activeWep:GetModel()
+            mvData.weapon.holdType = activeWep:GetHoldType()
+        end
 
         -- This player already has one or more clones, update them
         if mv_start[sid64] == false then
@@ -93,6 +118,7 @@ function EVENT:Begin()
                 end
                 TableInsert(ply.RdmtCosmicClones, clone)
             end)
+        -- Keep track of any move data while the clone is being created
         else
             mv_start[sid64].moves[curTime] = mvData
         end
@@ -106,10 +132,14 @@ function EVENT:End()
 
     for _, p in PlayerIterator() do
         timer.Remove("RdmtCosmicCloneCreate_" .. p:SteamID64())
-        ply.RdmtCosmicClones = nil
+        p.RdmtCosmicClones = nil
     end
 
     mv_start = {}
+end
+
+function EVENT:Condition()
+    return navmesh.IsLoaded() and navmesh.GetNavAreaCount() > 0
 end
 
 Randomat:register(EVENT)
