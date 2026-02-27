@@ -34,106 +34,33 @@ if SERVER then
     ENT.MoveData          = {}
     ENT.CloneOf           = nil
 
-    local IdleActIndex = {
-        ["pistol"]      = ACT_HL2MP_IDLE_PISTOL,
-        ["smg"]         = ACT_HL2MP_IDLE_SMG1,
-        ["grenade"]     = ACT_HL2MP_IDLE_GRENADE,
-        ["ar2"]         = ACT_HL2MP_IDLE_AR2,
-        ["shotgun"]     = ACT_HL2MP_IDLE_SHOTGUN,
-        ["rpg"]         = ACT_HL2MP_IDLE_RPG,
-        ["physgun"]     = ACT_HL2MP_IDLE_PHYSGUN,
-        ["crossbow"]    = ACT_HL2MP_IDLE_CROSSBOW,
-        ["melee"]       = ACT_HL2MP_IDLE_MELEE,
-        ["slam"]        = ACT_HL2MP_IDLE_SLAM,
-        ["fist"]        = ACT_HL2MP_IDLE_FIST,
-        ["melee2"]      = ACT_HL2MP_IDLE_MELEE2,
-        ["passive"]     = ACT_HL2MP_IDLE_PASSIVE,
-        ["knife"]       = ACT_HL2MP_IDLE_KNIFE,
-        ["duel"]        = ACT_HL2MP_IDLE_DUEL,
-        ["camera"]      = ACT_HL2MP_IDLE_CAMERA,
-        ["magic"]       = ACT_HL2MP_IDLE_MAGIC,
-        ["revolver"]    = ACT_HL2MP_IDLE_REVOLVER
-    }
-    local IdleCrouchActIndex = {
-        ["pistol"]      = ACT_HL2MP_IDLE_CROUCH_PISTOL,
-        ["smg"]         = ACT_HL2MP_IDLE_CROUCH_SMG1,
-        ["grenade"]     = ACT_HL2MP_IDLE_CROUCH_GRENADE,
-        ["ar2"]         = ACT_HL2MP_IDLE_CROUCH_AR2,
-        ["shotgun"]     = ACT_HL2MP_IDLE_CROUCH_SHOTGUN,
-        ["rpg"]         = ACT_HL2MP_IDLE_CROUCH_RPG,
-        ["physgun"]     = ACT_HL2MP_IDLE_CROUCH_PHYSGUN,
-        ["crossbow"]    = ACT_HL2MP_IDLE_CROUCH_CROSSBOW,
-        ["melee"]       = ACT_HL2MP_IDLE_CROUCH_MELEE,
-        ["slam"]        = ACT_HL2MP_IDLE_CROUCH_SLAM,
-        ["fist"]        = ACT_HL2MP_IDLE_CROUCH_FIST,
-        ["melee2"]      = ACT_HL2MP_IDLE_CROUCH_MELEE2,
-        ["passive"]     = ACT_HL2MP_IDLE_CROUCH_PASSIVE,
-        ["knife"]       = ACT_HL2MP_IDLE_CROUCH_KNIFE,
-        ["duel"]        = ACT_HL2MP_IDLE_CROUCH_DUEL,
-        ["camera"]      = ACT_HL2MP_IDLE_CROUCH_CAMERA,
-        ["magic"]       = ACT_HL2MP_IDLE_CROUCH_MAGIC,
-        ["revolver"]    = ACT_HL2MP_IDLE_CROUCH_REVOLVER
-    }
-    local RunActIndex = {
-        ["pistol"]      = ACT_HL2MP_RUN_PISTOL,
-        ["smg"]         = ACT_HL2MP_RUN_SMG1,
-        ["grenade"]     = ACT_HL2MP_RUN_GRENADE,
-        ["ar2"]         = ACT_HL2MP_RUN_AR2,
-        ["shotgun"]     = ACT_HL2MP_RUN_SHOTGUN,
-        ["rpg"]         = ACT_HL2MP_RUN_RPG,
-        ["physgun"]     = ACT_HL2MP_RUN_PHYSGUN,
-        ["crossbow"]    = ACT_HL2MP_RUN_CROSSBOW,
-        ["melee"]       = ACT_HL2MP_RUN_MELEE,
-        ["slam"]        = ACT_HL2MP_RUN_SLAM,
-        ["fist"]        = ACT_HL2MP_RUN_FIST,
-        ["melee2"]      = ACT_HL2MP_RUN_MELEE2,
-        ["passive"]     = ACT_HL2MP_RUN_PASSIVE,
-        ["knife"]       = ACT_HL2MP_RUN_KNIFE,
-        ["duel"]        = ACT_HL2MP_RUN_DUEL,
-        ["camera"]      = ACT_HL2MP_RUN_CAMERA,
-        ["magic"]       = ACT_HL2MP_RUN_MAGIC,
-        ["revolver"]    = ACT_HL2MP_RUN_REVOLVER
-    }
-    local WalkActIndex = {
-        ["pistol"]      = ACT_HL2MP_WALK_PISTOL,
-        ["smg"]         = ACT_HL2MP_WALK_SMG1,
-        ["grenade"]     = ACT_HL2MP_WALK_GRENADE,
-        ["ar2"]         = ACT_HL2MP_WALK_AR2,
-        ["shotgun"]     = ACT_HL2MP_WALK_SHOTGUN,
-        ["rpg"]         = ACT_HL2MP_WALK_RPG,
-        ["physgun"]     = ACT_HL2MP_WALK_PHYSGUN,
-        ["crossbow"]    = ACT_HL2MP_WALK_CROSSBOW,
-        ["melee"]       = ACT_HL2MP_WALK_MELEE,
-        ["slam"]        = ACT_HL2MP_WALK_SLAM,
-        ["fist"]        = ACT_HL2MP_WALK_FIST,
-        ["melee2"]      = ACT_HL2MP_WALK_MELEE2,
-        ["passive"]     = ACT_HL2MP_WALK_PASSIVE,
-        ["knife"]       = ACT_HL2MP_WALK_KNIFE,
-        ["duel"]        = ACT_HL2MP_WALK_DUEL,
-        ["camera"]      = ACT_HL2MP_WALK_CAMERA,
-        ["magic"]       = ACT_HL2MP_WALK_MAGIC,
-        ["revolver"]    = ACT_HL2MP_WALK_REVOLVER
-    }
-    local WalkCrouchActIndex = {
-        ["pistol"]      = ACT_HL2MP_WALK_CROUCH_PISTOL,
-        ["smg"]         = ACT_HL2MP_WALK_CROUCH_SMG1,
-        ["grenade"]     = ACT_HL2MP_WALK_CROUCH_GRENADE,
-        ["ar2"]         = ACT_HL2MP_WALK_CROUCH_AR2,
-        ["shotgun"]     = ACT_HL2MP_WALK_CROUCH_SHOTGUN,
-        ["rpg"]         = ACT_HL2MP_WALK_CROUCH_RPG,
-        ["physgun"]     = ACT_HL2MP_WALK_CROUCH_PHYSGUN,
-        ["crossbow"]    = ACT_HL2MP_WALK_CROUCH_CROSSBOW,
-        ["melee"]       = ACT_HL2MP_WALK_CROUCH_MELEE,
-        ["slam"]        = ACT_HL2MP_WALK_CROUCH_SLAM,
-        ["fist"]        = ACT_HL2MP_WALK_CROUCH_FIST,
-        ["melee2"]      = ACT_HL2MP_WALK_CROUCH_MELEE2,
-        ["passive"]     = ACT_HL2MP_WALK_CROUCH_PASSIVE,
-        ["knife"]       = ACT_HL2MP_WALK_CROUCH_KNIFE,
-        ["duel"]        = ACT_HL2MP_WALK_CROUCH_DUEL,
-        ["camera"]      = ACT_HL2MP_WALK_CROUCH_CAMERA,
-        ["magic"]       = ACT_HL2MP_WALK_CROUCH_MAGIC,
-        ["revolver"]    = ACT_HL2MP_WALK_CROUCH_REVOLVER
-    }
+    function ENT:GetTargetActivity(idle, mvData)
+        if not mvData.weapon.holdType then
+            return ACT_RESET
+        end
+
+        local actType
+        if mvData.jumping then
+            actType = "JUMP"
+        elseif idle then
+            actType = "IDLE"
+            if mvData.crouching then
+                actType = actType .. "_CROUCH"
+            end
+        elseif mvData.crouching then
+            actType = "WALK_CROUCH"
+        elseif mvData.walking then
+            actType = "WALK"
+        else
+            actType = "RUN"
+        end
+
+        local holdType = string.upper(mvData.weapon.holdType)
+        if holdType == "SMG" then
+            holdType = "SMG1"
+        end
+    return _G["ACT_HL2MP_" .. actType .. "_" .. holdType] or ACT_RESET
+    end
 
     function ENT:OnRemove(fullUpdate)
         timer.Remove("RdmtCosmicCloneLook" .. self:EntIndex())
@@ -142,7 +69,6 @@ if SERVER then
     end
 
     function ENT:UpdateActivity(act)
-        act = act or ACT_RESET
         if self:GetActivity() ~= act then
             self:StartActivity(act)
         end
@@ -206,24 +132,11 @@ if SERVER then
 
             -- If we're close enough to the position, just idle for a bit
             --print(self:GetRangeSquaredTo(mvData.pos))
-            if self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance then
-                local act
-                if mvData.crouching then
-                    act = IdleCrouchActIndex[mvData.weapon.holdType]
-                else
-                    act = IdleActIndex[mvData.weapon.holdType]
-                end
-                self:UpdateActivity(act)
-            else
-                local act
-                if mvData.crouching then
-                    act = WalkCrouchActIndex[mvData.weapon.holdType]
-                elseif mvData.walking then
-                    act = WalkActIndex[mvData.weapon.holdType]
-                else
-                    act = RunActIndex[mvData.weapon.holdType]
-                end
+            local idle = self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance
+            local act = self:GetTargetActivity(idle, mvData)
+            self:UpdateActivity(act)
 
+            if not idle then
                 self.loco:SetDesiredSpeed(mvData.speed)
                 self:UpdateActivity(act)
                 local result = self:MoveToPos(mvData.pos, {
