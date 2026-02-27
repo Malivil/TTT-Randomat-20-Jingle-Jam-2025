@@ -27,6 +27,7 @@ if SERVER then
     local EntsCreate = ents.Create
     local MathCeil = math.ceil
     local TableInsert = table.insert
+    local TableRemove = table.remove
 
     ENT.PositionTolerance = 50
     ENT.FakeWep           = nil
@@ -192,7 +193,10 @@ if SERVER then
                 continue
             end
 
-            self.MoveData[idx] = nil
+            -- Have to do it this way because setting the index to nil causes inserts
+            -- to overwrite previously nil-ed values which causes the bot to move
+            -- to the places in the wrong order
+            TableRemove(self.MoveData, idx)
 
             self:UpdateWeaponModel(mvData.weapon.model)
             self:SetPoseParameter("aim_yaw", mvData.view.yaw)
@@ -222,7 +226,6 @@ if SERVER then
 
                 self.loco:SetDesiredSpeed(mvData.speed)
                 self:UpdateActivity(act)
-                -- TODO: Some times the position is backwards
                 local result = self:MoveToPos(mvData.pos, {
                     lookahead = 100,
                     tolerance = 20,
