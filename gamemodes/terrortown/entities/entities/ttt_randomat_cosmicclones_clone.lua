@@ -17,8 +17,6 @@ function ENT:Initialize()
     self:SetCollisionBounds(Vector(-16, -16, 0), Vector(16, 16, 84))
 end
 
--- TODO: Prevent this entity from being killed
-
 if SERVER then
     local coroutine = coroutine
     local ents = ents
@@ -30,7 +28,7 @@ if SERVER then
     local MathCeil = math.ceil
     local TableInsert = table.insert
 
-    ENT.PositionTolerance = 0
+    ENT.PositionTolerance = 50
     ENT.FakeWep           = nil
     ENT.MoveData          = {}
     ENT.CloneOf           = nil
@@ -178,6 +176,8 @@ if SERVER then
 
     function ENT:RunBehaviour()
         local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
+        local rate = GetConVar("randomat_cosmicclones_rate"):GetInt()
+
         while (true) do
             local idx, mvData = next(self.MoveData)
             -- Sanity check
@@ -197,6 +197,7 @@ if SERVER then
             self:UpdateWeaponModel(mvData.weapon.model)
             self:SetPoseParameter("aim_yaw", mvData.view.yaw)
             self:SetPoseParameter("aim_pitch", mvData.view.pitch)
+            -- TODO: This gets overwritten by the movement logic. How do we make them move backwards?
             self:SetAngles(mvData.ang)
 
             -- If we're close enough to the position, just idle for a bit
@@ -221,16 +222,18 @@ if SERVER then
 
                 self.loco:SetDesiredSpeed(mvData.speed)
                 self:UpdateActivity(act)
+                -- TODO: Some times the position is backwards
                 local result = self:MoveToPos(mvData.pos, {
                     lookahead = 100,
                     tolerance = 20,
                     draw = true,
-                    maxage = 30,
+                    -- Stop this a little early to try and blend into the next movement
+                    maxage = rate * 0.8,
                     repath = 10000
                 })
 
                 -- If they are stuck, try teleporting them since these should be small increments anyway
-                if result ~= "ok" then
+                if result == "stuck" or result == "failed" then
                     self:SetPos(mvData.pos)
                 end
             end
@@ -277,5 +280,9 @@ if SERVER then
         dmginfo:SetDamage(MathCeil(damage))
         dmginfo:SetDamageForce(Vector(0, 0, 1))
         ent:TakeDamageInfo(dmginfo)
+    end
+
+    function ENT:BodyUpdate()
+        self:BodyMoveXY()
     end
 end

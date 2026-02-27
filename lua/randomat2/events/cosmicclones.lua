@@ -15,7 +15,7 @@ EVENT.Title = "Cosmic Clones"
 EVENT.id = "cosmicclones"
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
-CreateConVar("randomat_cosmicclones_rate", 0.5, FCVAR_NONE, "How often (in seconds) the player's data should be recorded. Lower number is more accurate, but higher compute requirements")
+CreateConVar("randomat_cosmicclones_rate", 1, FCVAR_NONE, "How often (in seconds) the player's data should be recorded. Lower number is more accurate, but higher compute requirements")
 
 local dark_red = Color(136, 0, 0)
 local function CreateClone(ply, pos, ang)
