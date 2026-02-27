@@ -77,23 +77,30 @@ function EVENT:Begin()
             -- Don't update too often
             if mv_last[sid64] and (curTime - mv_last[sid64]) < rate then continue end
 
+            local sprinting = cvars.Bool("ttt_sprint_enabled") and ply.GetSprinting and ply:GetSprinting()
+            local crouching = ply:Crouching()
+            local walking = not sprinting and ply:IsWalking()
             local speed = ply:GetWalkSpeed()
-            if ply:IsWalking() then
+            if walking then
                 speed = ply:GetSlowWalkSpeed()
             end
-            if ply:Crouching() then
+            if crouching then
                 speed = speed * ply:GetCrouchedWalkSpeed()
+            end
+            if sprinting then
+                speed = speed * GetSprintMultiplier(ply, true)
             end
 
             -- TODO: What else do we need from this?
             -- TODO: Jumping?
+            -- TODO: Other animations like shooting guns
             local mvData = {
                 time = curTime,
                 pos = ply:GetPos(),
                 ang = ply:GetAngles(),
                 view = ply:EyeAngles(),
-                crouching = ply:Crouching(),
-                walking = ply:IsWalking(),
+                crouching = crouching,
+                walking = walking,
                 speed = speed,
                 weapon = {}
             }
