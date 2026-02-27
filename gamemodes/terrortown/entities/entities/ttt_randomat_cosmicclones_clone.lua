@@ -228,8 +228,8 @@ if SERVER then
                 self:UpdateActivity(act)
                 local result = self:MoveToPos(mvData.pos, {
                     lookahead = 100,
-                    tolerance = 20,
-                    draw = true,
+                    tolerance = 10,
+                    draw = false,
                     -- Stop this a little early to try and blend into the next movement
                     maxage = rate * 0.8,
                     repath = 10000
