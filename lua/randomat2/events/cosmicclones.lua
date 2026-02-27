@@ -67,91 +67,95 @@ function EVENT:Begin()
         timer.Remove("RdmtCosmicCloneCreate_" .. sid64)
     end)
 
-    self:AddHook("Think", function()
-        for _, ply in ipairs(self:GetAlivePlayers()) do
-            -- TODO: Remove
-            if ply:Nick() ~= "Malivil" then continue end
+    self:AddHook("SetupMove", function(ply, mv, cmd)
+        -- TODO: Remove
+        if ply:Nick() ~= "Malivil" then return end
 
-            local curTime = CurTime()
-            local sid64 = ply:SteamID64()
-            -- Don't update too often
-            if mv_last[sid64] and (curTime - mv_last[sid64]) < rate then continue end
+        local curTime = CurTime()
+        local sid64 = ply:SteamID64()
+        -- Don't update too often
+        if mv_last[sid64] and (curTime - mv_last[sid64]) < rate then return end
 
-            local sprinting = cvars.Bool("ttt_sprint_enabled") and ply.GetSprinting and ply:GetSprinting()
-            local crouching = ply:Crouching()
-            local walking = not sprinting and ply:IsWalking()
-            local speed = ply:GetWalkSpeed()
-            if walking then
-                speed = ply:GetSlowWalkSpeed()
-            end
-            if crouching then
-                speed = speed * ply:GetCrouchedWalkSpeed()
-            end
-            if sprinting then
-                speed = speed * GetSprintMultiplier(ply, true)
-            end
+        local sprinting = cvars.Bool("ttt_sprint_enabled") and ply.GetSprinting and ply:GetSprinting()
+        local crouching = ply:Crouching()
+        local walking = not sprinting and ply:IsWalking()
+        local speed = ply:GetWalkSpeed()
+        if walking then
+            speed = ply:GetSlowWalkSpeed()
+        end
+        if crouching then
+            speed = speed * ply:GetCrouchedWalkSpeed()
+        end
+        if sprinting then
+            speed = speed * GetSprintMultiplier(ply, true)
+        end
 
-            -- TODO: What else do we need from this?
-            -- TODO: Jumping?
-            -- TODO: Other animations like shooting guns
-            local mvData = {
-                time = curTime,
-                pos = ply:GetPos(),
-                ang = ply:GetAngles(),
-                view = ply:EyeAngles(),
-                crouching = crouching,
-                walking = walking,
-                speed = speed,
-                weapon = {}
-            }
-            mv_last[sid64] = curTime
+        local jumpPower = ply:GetJumpPower()
+        if ply.GetExtraJumpPower then
+            jumpPower = jumpPower * ply:GetExtraJumpPower()
+        end
 
-            local activeWep = ply:GetActiveWeapon()
-            if IsValid(activeWep) and activeWep ~= NULL then
-                mvData.weapon.model = activeWep:GetModel()
-                mvData.weapon.holdType = activeWep:GetHoldType()
-            end
+        -- TODO: What else do we need from this?
+        -- TODO: Other animations like shooting guns
+        local mvData = {
+            time = curTime,
+            pos = ply:GetPos(),
+            ang = ply:GetAngles(),
+            view = ply:EyeAngles(),
+            crouching = crouching,
+            walking = walking,
+            jumping = mv:KeyWasDown(IN_JUMP) and not ply:OnGround(),
+            jumpPower = jumpPower,
+            speed = speed,
+            weapon = {}
+        }
+        mv_last[sid64] = curTime
 
-            -- This player already has one or more clones, update them
-            if mv_start[sid64] == false then
-                if ply.RdmtCosmicClones then
-                    for _, c in ipairs(ply.RdmtCosmicClones) do
-                        c:AddMoveData(mvData)
-                    end
-                else
-                    TableInsert(mv_start[sid64].moves, mvData)
+        local activeWep = ply:GetActiveWeapon()
+        if IsValid(activeWep) and activeWep ~= NULL then
+            mvData.weapon.model = activeWep:GetModel()
+            mvData.weapon.holdType = activeWep:GetHoldType()
+        end
+
+        -- This player already has one or more clones, update them
+        if mv_start[sid64] == false then
+            if ply.RdmtCosmicClones then
+                for _, c in ipairs(ply.RdmtCosmicClones) do
+                    c:AddMoveData(mvData)
                 end
-            -- Start waiting to create the clone
-            elseif not mv_start[sid64] then
-                mv_start[sid64] = {
-                    pos = ply:GetPos(),
-                    ang = ply:GetAngles(),
-                    moves = {
-                        [1] = mvData
-                    }
-                }
-
-                timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, 1, function()
-                    if not IsValid(ply) then return end
-                    local mvStart = mv_start[sid64]
-
-                    -- Create the clone and pass any move history that we have
-                    local clone = CreateClone(ply, mvStart.pos, mvStart.ang)
-                    for _, d in ipairs(mv_start[sid64].moves) do
-                        clone:AddMoveData(d)
-                    end
-
-                    mv_start[sid64] = false
-
-                    if not ply.RdmtCosmicClones then
-                        ply.RdmtCosmicClones = {}
-                    end
-                    TableInsert(ply.RdmtCosmicClones, clone)
-                end)
-            -- Keep track of any move data while the clone is being created
             else
                 TableInsert(mv_start[sid64].moves, mvData)
             end
+        -- Start waiting to create the clone
+        elseif not mv_start[sid64] then
+            mv_start[sid64] = {
+                pos = ply:GetPos(),
+                ang = ply:GetAngles(),
+                moves = {
+                    [1] = mvData
+                }
+            }
+
+            timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, 1, function()
+                if not IsValid(ply) then return end
+                local mvStart = mv_start[sid64]
+
+                -- Create the clone and pass any move history that we have
+                local clone = CreateClone(ply, mvStart.pos, mvStart.ang)
+                for _, d in ipairs(mv_start[sid64].moves) do
+                    clone:AddMoveData(d)
+                end
+
+                mv_start[sid64] = false
+
+                if not ply.RdmtCosmicClones then
+                    ply.RdmtCosmicClones = {}
+                end
+                TableInsert(ply.RdmtCosmicClones, clone)
+            end)
+        -- Keep track of any move data while the clone is being created
+        else
+            TableInsert(mv_start[sid64].moves, mvData)
         end
     end)
 end
