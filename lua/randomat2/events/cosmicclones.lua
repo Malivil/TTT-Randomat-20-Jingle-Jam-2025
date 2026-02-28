@@ -70,6 +70,7 @@ function EVENT:Begin()
     self:AddHook("SetupMove", function(ply, mv, cmd)
         -- TODO: Remove
         if ply:Nick() ~= "Malivil" then return end
+        if not ply:Alive() or ply:IsSpec() then return end
 
         local curTime = CurTime()
         local sid64 = ply:SteamID64()
