@@ -34,9 +34,9 @@ if SERVER then
     ENT.MoveData          = {}
     ENT.CloneOf           = nil
 
-    function ENT:GetTargetActivity(idle, mvData)
+    function ENT:GetMovementSequence(idle, mvData)
         if not mvData.weapon.holdType then
-            return ACT_RESET
+            return self:SelectWeightedSequence(ACT_RESET)
         end
 
         local actType
@@ -59,19 +59,13 @@ if SERVER then
         if holdType == "SMG" then
             holdType = "SMG1"
         end
-    return _G["ACT_HL2MP_" .. actType .. "_" .. holdType] or ACT_RESET
+        return self:SelectWeightedSequence(_G["ACT_HL2MP_" .. actType .. "_" .. holdType] or ACT_RESET)
     end
 
     function ENT:OnRemove(fullUpdate)
         timer.Remove("RdmtCosmicCloneLook" .. self:EntIndex())
         SafeRemoveEntity(self.FakeWep)
         self.FakeWep = nil
-    end
-
-    function ENT:UpdateActivity(act)
-        if self:GetActivity() ~= act then
-            self:StartActivity(act)
-        end
     end
 
     function ENT:UpdateWeaponModel(model)
@@ -133,8 +127,21 @@ if SERVER then
             -- If we're close enough to the position, just idle for a bit
             --print(self:GetRangeSquaredTo(mvData.pos))
             local idle = self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance
-            local act = self:GetTargetActivity(idle, mvData)
-            self:UpdateActivity(act)
+
+            -- Remove all the old layers
+            for i = 0, MAX_OVERLAYS do
+                self:RemoveLayer(i)
+            end
+
+            -- Play the movement sequence
+            local seq = self:GetMovementSequence(idle, mvData)
+            self:AddLayeredSequence(seq, 1)
+
+            -- And any other layers below that
+            for i, s in ipairs(mvData.seq) do
+                self:AddLayeredSequence(s.id, 2 + i)
+            end
+
             -- TODO: Make them move up like they are jumping
             if mvData.jumping then
                 local vel = self.loco:GetVelocity()
@@ -148,8 +155,7 @@ if SERVER then
 
             if not idle then
                 self.loco:SetDesiredSpeed(mvData.speed)
-                self:UpdateActivity(act)
-                local result = self:MoveToPos(mvData.pos, {
+                --[[local result = ]]self:MoveToPos(mvData.pos, {
                     lookahead = 100,
                     tolerance = 10,
                     draw = false,
@@ -158,10 +164,10 @@ if SERVER then
                     repath = 10000
                 })
 
-                -- If they are stuck, try teleporting them since these should be small increments anyway
-                if result == "stuck" or result == "failed" then
-                    self:SetPos(mvData.pos)
-                end
+                -- TODO: If they are stuck, try teleporting them since these should be small increments anyway
+                --if result == "stuck" or result == "failed" then
+                --    self:SetPos(mvData.pos)
+                --end
             end
 
             coroutine.yield()

@@ -1366,13 +1366,13 @@ globals = {
 
     -- External addon constants and namespaces
     "EQUIP_PHD",
-    "ULib",
 
     -- JJ2022 Roles
     "ROLE_DETECTOCLOWN",
 
     -- JJ2025 Randomat
     "HOMEALONE",
+    "MAX_OVERLAYS",
     "ROLE_KEVIN",
     "SCAVENGER_HUNT",
     "WIN_KEVIN",
