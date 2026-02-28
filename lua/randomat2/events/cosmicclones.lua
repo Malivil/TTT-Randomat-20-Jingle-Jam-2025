@@ -7,7 +7,11 @@ local table = table
 local EntsCreate = ents.Create
 local EntsFindByClass = ents.FindByClass
 local PlayerIterator = player.Iterator
+local TableHasValue = table.HasValue
 local TableInsert = table.insert
+
+-- Defined in BaseAnimatingOverlay.h#L132
+MAX_OVERLAYS = MAX_OVERLAYS or 15
 
 local EVENT = {}
 
@@ -16,6 +20,9 @@ EVENT.id = "cosmicclones"
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
 CreateConVar("randomat_cosmicclones_rate", 1, FCVAR_NONE, "How often (in seconds) the player's data should be recorded. Lower number is more accurate, but higher compute requirements")
+
+-- Ignore jump_land because the timing doesn't work out
+local ignoredSequences = {"jump_land"}
 
 local dark_red = Color(136, 0, 0)
 local function CreateClone(ply, pos, ang)
@@ -96,8 +103,23 @@ function EVENT:Begin()
             jumpPower = jumpPower * ply:GetExtraJumpPower()
         end
 
-        -- TODO: What else do we need from this?
-        -- TODO: Other animations like shooting guns
+        local layers = {}
+        -- Overlay index starts from 0 up to 15 
+        for i = 0, MAX_OVERLAYS do
+            if not ply:IsValidLayer(i) then continue end
+
+            local seq = ply:GetLayerSequence(i)
+            local seqName = ply:GetSequenceName(seq)
+            if TableHasValue(ignoredSequences, seqName) then continue end
+
+            TableInsert(layers, {
+                id = seq,
+                dur = ply:GetLayerDuration(i),
+                rate = ply:GetLayerPlaybackRate(i),
+                weight = ply:GetLayerWeight(i)
+            })
+        end
+
         local mvData = {
             time = curTime,
             pos = ply:GetPos(),
@@ -108,6 +130,7 @@ function EVENT:Begin()
             jumping = mv:KeyWasDown(IN_JUMP) and not ply:OnGround(),
             jumpPower = jumpPower,
             speed = speed,
+            seq = layers,
             weapon = {}
         }
         mv_last[sid64] = curTime
