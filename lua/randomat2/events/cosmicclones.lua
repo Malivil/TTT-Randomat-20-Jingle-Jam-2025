@@ -104,7 +104,7 @@ function EVENT:Begin()
         end
 
         local layers = {}
-        -- Overlay index starts from 0 up to 15 
+        -- Overlay index starts from 0 up to 15
         for i = 0, MAX_OVERLAYS do
             if not ply:IsValidLayer(i) then continue end
 
