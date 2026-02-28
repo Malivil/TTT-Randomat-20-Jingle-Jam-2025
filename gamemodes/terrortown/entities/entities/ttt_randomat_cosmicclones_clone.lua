@@ -135,6 +135,16 @@ if SERVER then
             local idle = self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance
             local act = self:GetTargetActivity(idle, mvData)
             self:UpdateActivity(act)
+            -- TODO: Make them move up like they are jumping
+            if mvData.jumping then
+                local vel = self.loco:GetVelocity()
+                vel.z = mvData.jumpPower
+                self.loco:SetVelocity(vel)
+
+                vel = self:GetVelocity()
+                vel.z = mvData.jumpPower
+                self:SetVelocity(vel)
+            end
 
             if not idle then
                 self.loco:SetDesiredSpeed(mvData.speed)
