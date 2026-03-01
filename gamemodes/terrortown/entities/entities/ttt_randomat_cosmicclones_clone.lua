@@ -93,8 +93,16 @@ if SERVER then
             self.FakeWep:SetParent(self)
         end
 
-        if self.FakeWep:GetModel() ~= model then
-            self.FakeWep:SetModel(model)
+        if not util.IsValidModel(model) then
+            self.FakeWep:SetNoDraw(true)
+        else
+            if self.FakeWep:GetNoDraw() then
+                self.FakeWep:SetNoDraw(false)
+            end
+
+            if self.FakeWep:GetModel() ~= model then
+                self.FakeWep:SetModel(model)
+            end
         end
     end
 
