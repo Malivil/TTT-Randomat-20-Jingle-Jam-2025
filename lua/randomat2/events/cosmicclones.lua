@@ -137,8 +137,8 @@ function EVENT:Begin()
 
         local activeWep = ply:GetActiveWeapon()
         if IsValid(activeWep) and activeWep ~= NULL then
-            mvData.weapon.model = activeWep:GetModel()
-            mvData.weapon.holdType = activeWep:GetHoldType()
+            mvData.weapon.model = activeWep.WorldModel
+            mvData.weapon.holdType = activeWep.HoldType
         end
 
         -- This player already has one or more clones, update them
