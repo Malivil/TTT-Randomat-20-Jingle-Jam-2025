@@ -55,11 +55,14 @@ if SERVER then
             actType = "RUN"
         end
 
-        local holdType = string.upper(mvData.weapon.holdType)
-        if holdType == "SMG" then
-            holdType = "SMG1"
+        local holdType = "_" .. string.upper(mvData.weapon.holdType)
+        if holdType == "_SMG" then
+            holdType = "_SMG1"
         end
-        return self:SelectWeightedSequence(_G["ACT_HL2MP_" .. actType .. "_" .. holdType] or ACT_RESET)
+        if holdType == "_NORMAL" then
+            holdType = ""
+        end
+        return self:SelectWeightedSequence(_G["ACT_HL2MP_" .. actType .. holdType] or ACT_RESET)
     end
 
     function ENT:OnRemove(fullUpdate)
