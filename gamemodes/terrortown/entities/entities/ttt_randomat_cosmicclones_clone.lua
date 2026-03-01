@@ -136,7 +136,6 @@ if SERVER then
             self:SetAngles(mvData.ang)
 
             -- If we're close enough to the position, just idle for a bit
-            --print(self:GetRangeSquaredTo(mvData.pos))
             local idle = self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance
 
             -- Remove all the old layers
@@ -171,8 +170,7 @@ if SERVER then
                     tolerance = 10,
                     draw = false,
                     -- Stop this a little early to try and blend into the next movement
-                    maxage = rate * 0.8,
-                    repath = 10000
+                    maxage = rate * 0.8
                 })
 
                 -- TODO: If they are stuck, try teleporting them since these should be small increments anyway
