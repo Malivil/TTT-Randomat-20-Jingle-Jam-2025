@@ -1,5 +1,7 @@
+local engine = engine
 local ents = ents
 local ipairs = ipairs
+local math = math
 local pairs = pairs
 local player = player
 local table = table
@@ -7,6 +9,7 @@ local util = util
 
 local EntsCreate = ents.Create
 local EntsFindByClass = ents.FindByClass
+local MathRound = math.Round
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
 
@@ -16,13 +19,17 @@ local EVENT = {}
 
 EVENT.Title = "Cosmic Clones"
 EVENT.id = "cosmicclones"
+-- TODO: Description, type, etc.
+-- TODO: GetConVars
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
 
-local dark_red = Color(136, 0, 0)
-local mv_start = {}
+local darkRed = Color(136, 0, 0)
+local tickRate
+local moveStart = {}
+local moveLast = {}
 
-local function CreateClone(ply, pos, ang)
+local function CreateClone(ply, pos, ang, delay)
     local clone = EntsCreate("ttt_randomat_cosmicclones_clone")
     clone:SetPos(pos)
     clone:SetAngles(ang)
@@ -31,9 +38,10 @@ local function CreateClone(ply, pos, ang)
     for _, value in pairs(ply:GetBodyGroups()) do
         clone:SetBodygroup(value.id, ply:GetBodygroup(value.id))
     end
-    clone:SetColor(dark_red)
+    clone:SetColor(darkRed)
     clone:SetMaterial("models/shiny")
     clone:SetCloneOf(ply:SteamID64())
+    clone:SetDelay(delay)
     clone:Spawn()
     clone:Activate()
 
@@ -42,8 +50,13 @@ end
 
 local function ClearClones(ply)
     local sid64 = ply:SteamID64()
-    mv_start[sid64] = nil
+    moveStart[sid64] = nil
+    moveLast[sid64] = nil
     timer.Remove("RdmtCosmicCloneCreate_" .. sid64)
+
+    net.Start("RdmtCosmicCloneClear")
+        net.WritePlayer(ply)
+    net.Broadcast()
 
     if not ply.RdmtCosmicClones then return end
 
@@ -51,27 +64,42 @@ local function ClearClones(ply)
         SafeRemoveEntity(c)
     end
     ply.RdmtCosmicClones = nil
-
-    net.Start("RdmtCosmicCloneClear")
-        net.WritePlayer(ply)
-    net.Broadcast()
 end
 
 function EVENT:Begin()
     local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
+    tickRate = MathRound(engine.TickInterval(), 3)
+    moveStart = {}
+    moveLast = {}
 
-    -- Destroy clones and reset state when a player dies
-    -- or disconnects. This means clones will be recreated
-    -- automatically if a player is respawned
+    -- Destroy clones and reset state when a player dies,
+    -- disconnects, or respawns. The logic in SetupMove
+    -- will automatically re-create the clone for the
+    -- respawned player
     self:AddHook("PostPlayerDeath", ClearClones)
     self:AddHook("PlayerDisconnected", ClearClones)
+    self:AddHook("PlayerSpawn", function(ply, transition)
+        ClearClones(ply)
+    end)
 
     self:AddHook("SetupMove", function(ply, mv, cmd)
+        -- TODO: Remove
+        if ply:IsBot() then return end
         if not ply:Alive() or ply:IsSpec() then return end
+
+        local curTime = CurTime()
+        local sid64 = ply:SteamID64()
+        if moveLast[sid64] then
+            local diff = MathRound(curTime - moveLast[sid64], 3)
+            if diff < tickRate then return end
+        end
+
+        moveLast[sid64] = curTime
 
         local mvData = {
             pos = ply:GetPos(),
-            time = CurTime()
+            -- TODO: Remove this?
+            time = curTime
         }
 
         local activeWep = ply:GetActiveWeapon()
@@ -79,19 +107,16 @@ function EVENT:Begin()
             mvData.wep = activeWep.WorldModel
         end
 
-        local sid64 = ply:SteamID64()
         -- This player already has one or more clones, update them
-        if mv_start[sid64] == false then
+        if moveStart[sid64] == false then
             if ply.RdmtCosmicClones then
                 for _, c in ipairs(ply.RdmtCosmicClones) do
                     c:AddMoveData(mvData)
                 end
-            else
-                TableInsert(mv_start[sid64].moves, mvData)
             end
         -- Start waiting to create the clone
-        elseif not mv_start[sid64] then
-            mv_start[sid64] = {
+        elseif not moveStart[sid64] then
+            moveStart[sid64] = {
                 pos = ply:GetPos(),
                 ang = ply:GetAngles(),
                 moves = {
@@ -101,15 +126,16 @@ function EVENT:Begin()
 
             timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, 1, function()
                 if not IsValid(ply) then return end
-                local mvStart = mv_start[sid64]
+                local mvStart = moveStart[sid64]
 
                 -- Create the clone and pass any move history that we have
-                local clone = CreateClone(ply, mvStart.pos, mvStart.ang)
-                for _, d in ipairs(mv_start[sid64].moves) do
+                local clone = CreateClone(ply, mvStart.pos, mvStart.ang, delay)
+                for _, d in ipairs(moveStart[sid64].moves) do
                     clone:AddMoveData(d)
                 end
 
-                mv_start[sid64] = false
+                moveStart[sid64] = false
+                moveLast[sid64] = nil
 
                 if not ply.RdmtCosmicClones then
                     ply.RdmtCosmicClones = {}
@@ -118,7 +144,7 @@ function EVENT:Begin()
             end)
         -- Keep track of any move data while the clone is being created
         else
-            TableInsert(mv_start[sid64].moves, mvData)
+            TableInsert(moveStart[sid64].moves, mvData)
         end
     end)
 end
@@ -133,7 +159,8 @@ function EVENT:End()
         p.RdmtCosmicClones = nil
     end
 
-    mv_start = {}
+    moveStart = {}
+    moveLast = {}
 end
 
 function EVENT:Condition()

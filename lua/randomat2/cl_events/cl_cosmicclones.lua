@@ -5,6 +5,7 @@ local player = player
 local table = table
 
 local EntsFindByClass = ents.FindByClass
+local MathRound = math.Round
 local MathRemap = math.Remap
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
@@ -12,17 +13,35 @@ local TableInsert = table.insert
 local EVENT = {}
 EVENT.id = "cosmicclones"
 
-local mv_start = {}
+local tickRate
+local moveStart = {}
+local moveLast = {}
 
 local function ClearClones(ply)
     local sid64 = ply:SteamID64()
-    mv_start[sid64] = nil
+    moveStart[sid64] = nil
+    moveLast[sid64] = nil
     ply.RdmtCosmicClones = nil
 end
 
 function EVENT:Begin()
+    tickRate = math.Round(engine.TickInterval(), 3)
+    moveStart = {}
+    moveLast = {}
+
     self:AddHook("SetupMove", function(ply, mv, cmd)
+        -- TODO: Remove
+        if ply:IsBot() then return end
         if not ply:Alive() or ply:IsSpec() then return end
+
+        local curTime = CurTime()
+        local sid64 = ply:SteamID64()
+        if moveLast[sid64] then
+            local diff = MathRound(curTime - moveLast[sid64], 3)
+            if diff < tickRate then return end
+        end
+
+        moveLast[sid64] = curTime
 
         local poses = {}
         for i = 0, ply:GetNumPoseParameters() - 1 do
@@ -32,7 +51,8 @@ function EVENT:Begin()
         end
 
         local mvData = {
-            time = CurTime(),
+            -- TODO: Remove this?
+            time = curTime,
             pos = ply:GetPos(),
             ang = ply:GetRenderAngles(),
             seq = ply:GetSequence(),
@@ -40,20 +60,18 @@ function EVENT:Begin()
             poses = poses
         }
 
-        local sid64 = ply:SteamID64()
         -- This player already has one or more clones, update them
-        if mv_start[sid64] == false then
+        if moveStart[sid64] == false then
             if ply.RdmtCosmicClones then
                 for _, c in ipairs(ply.RdmtCosmicClones) do
+                    print(c)
                     if not IsValid(c) then continue end
                     c:AddMoveData(mvData)
                 end
-            else
-                TableInsert(mv_start[sid64].moves, mvData)
             end
         -- Start waiting to create the clone
-        elseif not mv_start[sid64] then
-            mv_start[sid64] = {
+        elseif not moveStart[sid64] then
+            moveStart[sid64] = {
                 moves = {
                     [1] = mvData
                 }
@@ -68,18 +86,19 @@ function EVENT:Begin()
             end
 
             if clone then
-                for _, d in ipairs(mv_start[sid64].moves) do
+                for _, d in ipairs(moveStart[sid64].moves) do
                     clone:AddMoveData(d)
                 end
 
-                mv_start[sid64] = false
+                moveStart[sid64] = false
+                moveLast[sid64] = nil
 
                 if not ply.RdmtCosmicClones then
                     ply.RdmtCosmicClones = {}
                 end
                 TableInsert(ply.RdmtCosmicClones, clone)
             else
-                TableInsert(mv_start[sid64].moves, mvData)
+                TableInsert(moveStart[sid64].moves, mvData)
             end
         end
     end)
@@ -96,7 +115,8 @@ function EVENT:End()
         ClearClones(p)
     end
 
-    mv_start = {}
+    moveStart = {}
+    moveLast = {}
 end
 
 Randomat:register(EVENT)
