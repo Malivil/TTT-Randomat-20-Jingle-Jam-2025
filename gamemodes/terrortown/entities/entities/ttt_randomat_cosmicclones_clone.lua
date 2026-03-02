@@ -22,7 +22,6 @@ if SERVER then
     local ents = ents
     local math = math
     local table = table
-    local timer = timer
 
     local EntsCreate = ents.Create
     local MathCeil = math.ceil
@@ -66,7 +65,6 @@ if SERVER then
     end
 
     function ENT:OnRemove(fullUpdate)
-        timer.Remove("RdmtCosmicCloneLook" .. self:EntIndex())
         SafeRemoveEntity(self.FakeWep)
         self.FakeWep = nil
     end
