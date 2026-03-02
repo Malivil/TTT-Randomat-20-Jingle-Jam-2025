@@ -7,10 +7,6 @@ if CLIENT then
     ENT.PrintName = "Cosmic Clone"
 end
 
-function ENT:SetupDataTables()
-   self:NetworkVar("String", "HoldType")
-end
-
 function ENT:Initialize()
     self:SetMoveType(SOLID_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
