@@ -26,13 +26,9 @@ function EVENT:Begin()
 
         local poses = {}
         for i = 0, ply:GetNumPoseParameters() - 1 do
-            local poseName = ply:GetPoseParameterName(i)
             local poseMin, poseMax = ply:GetPoseParameterRange(i)
-            local poseValue = MathRemap(ply:GetPoseParameter(poseName), 0, 1, poseMin, poseMax)
-            TableInsert(poses, {
-                name = poseName,
-                val = poseValue
-            })
+            local poseValue = MathRemap(ply:GetPoseParameter(i), 0, 1, poseMin, poseMax)
+            poses[i] = poseValue
         end
 
         local mvData = {
