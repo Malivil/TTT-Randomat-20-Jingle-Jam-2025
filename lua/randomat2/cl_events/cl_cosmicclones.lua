@@ -35,11 +35,10 @@ function EVENT:Begin()
             })
         end
 
-        local _, angY, angZ = ply:GetRenderAngles():Unpack()
         local mvData = {
             time = CurTime(),
             pos = ply:GetPos(),
-            ang = Angle(0, angY, angZ),
+            ang = ply:GetRenderAngles(),
             seq = ply:GetSequence(),
             cyc = ply:GetCycle(),
             poses = poses
