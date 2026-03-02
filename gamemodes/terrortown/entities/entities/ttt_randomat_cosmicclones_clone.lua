@@ -1,6 +1,7 @@
 AddCSLuaFile()
 
 local ents = ents
+local pairs = pairs
 local table = table
 
 local EntsCreate = ents.Create
@@ -84,8 +85,8 @@ function ENT:Think()
         self:SetCycle(mvData.cyc)
         self:SetSequence(mvData.seq)
         -- TODO: This doesn't handle weapon attacking like swinging the crowbar
-        for _, pose in ipairs(mvData.poses) do
-            self:SetPoseParameter(pose.name, pose.val)
+        for pose, val in pairs(mvData.poses) do
+            self:SetPoseParameter(pose, val)
         end
 
         self:SetNextClientThink(CurTime() + engine.TickInterval())
