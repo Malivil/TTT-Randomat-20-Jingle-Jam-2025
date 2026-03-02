@@ -1372,7 +1372,6 @@ globals = {
 
     -- JJ2025 Randomat
     "HOMEALONE",
-    "MAX_OVERLAYS",
     "ROLE_KEVIN",
     "SCAVENGER_HUNT",
     "WIN_KEVIN",
