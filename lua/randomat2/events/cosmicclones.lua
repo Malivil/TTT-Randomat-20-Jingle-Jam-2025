@@ -10,9 +10,6 @@ local EntsFindByClass = ents.FindByClass
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
 
--- Defined in BaseAnimatingOverlay.h#L132
-MAX_OVERLAYS = MAX_OVERLAYS or 15
-
 util.AddNetworkString("RdmtCosmicCloneClear")
 
 local EVENT = {}

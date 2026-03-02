@@ -42,8 +42,7 @@ function EVENT:Begin()
             ang = Angle(0, angY, angZ),
             seq = ply:GetSequence(),
             cyc = ply:GetCycle(),
-            poses = poses,
-            layers = layers
+            poses = poses
         }
 
         local sid64 = ply:SteamID64()
