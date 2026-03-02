@@ -3,15 +3,17 @@ local ipairs = ipairs
 local pairs = pairs
 local player = player
 local table = table
+local util = util
 
 local EntsCreate = ents.Create
 local EntsFindByClass = ents.FindByClass
 local PlayerIterator = player.Iterator
-local TableHasValue = table.HasValue
 local TableInsert = table.insert
 
 -- Defined in BaseAnimatingOverlay.h#L132
 MAX_OVERLAYS = MAX_OVERLAYS or 15
+
+util.AddNetworkString("RdmtCosmicCloneClear")
 
 local EVENT = {}
 
@@ -19,12 +21,10 @@ EVENT.Title = "Cosmic Clones"
 EVENT.id = "cosmicclones"
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
-CreateConVar("randomat_cosmicclones_rate", 1, FCVAR_NONE, "How often (in seconds) the player's data should be recorded. Lower number is more accurate, but higher compute requirements")
-
--- Ignore jump_land because the timing doesn't work out
-local ignoredSequences = {"jump_land"}
 
 local dark_red = Color(136, 0, 0)
+local mv_start = {}
+
 local function CreateClone(ply, pos, ang)
     local clone = EntsCreate("ttt_randomat_cosmicclones_clone")
     clone:SetPos(pos)
@@ -36,111 +36,53 @@ local function CreateClone(ply, pos, ang)
     end
     clone:SetColor(dark_red)
     clone:SetMaterial("models/shiny")
-    clone.CloneOf = ply
+    clone:SetCloneOf(ply:SteamID64())
     clone:Spawn()
     clone:Activate()
 
     return clone
 end
 
-local mv_start = {}
-local mv_last = {}
+local function ClearClones(ply)
+    local sid64 = ply:SteamID64()
+    mv_start[sid64] = nil
+    timer.Remove("RdmtCosmicCloneCreate_" .. sid64)
+
+    if not ply.RdmtCosmicClones then return end
+
+    for _, c in ipairs(ply.RdmtCosmicClones) do
+        SafeRemoveEntity(c)
+    end
+    ply.RdmtCosmicClones = nil
+
+    net.Start("RdmtCosmicCloneClear")
+        net.WritePlayer(ply)
+    net.Broadcast()
+end
+
 function EVENT:Begin()
     local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
-    local rate = GetConVar("randomat_cosmicclones_rate"):GetInt()
-
-    -- The clones are invincible
-    self:AddHook("EntityTakeDamage", function(target, dmginfo)
-        if not IsValid(target) then return end
-        if target:GetClass() == "ttt_randomat_cosmicclones_clone" then
-            dmginfo:SetDamage(0)
-            return true
-        end
-    end)
 
     -- Destroy clones and reset state when a player dies
-    -- This means clones will be recreated automatically if
-    -- a player is respawned
-    self:AddHook("PostPlayerDeath", function(ply)
-        if not ply.RdmtCosmicClones then return end
-
-        for _, c in ipairs(ply.RdmtCosmicClones) do
-            SafeRemoveEntity(c)
-        end
-        ply.RdmtCosmicClones = nil
-
-        local sid64 = ply:SteamID64()
-        mv_start[sid64] = nil
-        timer.Remove("RdmtCosmicCloneCreate_" .. sid64)
-    end)
+    -- or disconnects. This means clones will be recreated
+    -- automatically if a player is respawned
+    self:AddHook("PostPlayerDeath", ClearClones)
+    self:AddHook("PlayerDisconnected", ClearClones)
 
     self:AddHook("SetupMove", function(ply, mv, cmd)
-        -- TODO: Remove
-        if ply:Nick() ~= "Malivil" then return end
         if not ply:Alive() or ply:IsSpec() then return end
 
-        local curTime = CurTime()
-        local sid64 = ply:SteamID64()
-        -- Don't update too often
-        if mv_last[sid64] and (curTime - mv_last[sid64]) < rate then return end
-
-        local sprinting = cvars.Bool("ttt_sprint_enabled") and ply.GetSprinting and ply:GetSprinting()
-        local crouching = ply:Crouching()
-        local walking = not sprinting and ply:IsWalking()
-        local speed = ply:GetWalkSpeed()
-        if walking then
-            speed = ply:GetSlowWalkSpeed()
-        end
-        if crouching then
-            speed = speed * ply:GetCrouchedWalkSpeed()
-        end
-        if sprinting then
-            speed = speed * GetSprintMultiplier(ply, true)
-        end
-
-        local jumpPower = ply:GetJumpPower()
-        if ply.GetExtraJumpPower then
-            jumpPower = jumpPower * ply:GetExtraJumpPower()
-        end
-
-        local layers = {}
-        -- Overlay index starts from 0 up to 15
-        for i = 0, MAX_OVERLAYS do
-            if not ply:IsValidLayer(i) then continue end
-
-            local seq = ply:GetLayerSequence(i)
-            local seqName = ply:GetSequenceName(seq)
-            if TableHasValue(ignoredSequences, seqName) then continue end
-
-            TableInsert(layers, {
-                id = seq,
-                dur = ply:GetLayerDuration(i),
-                rate = ply:GetLayerPlaybackRate(i),
-                weight = ply:GetLayerWeight(i)
-            })
-        end
-
         local mvData = {
-            time = curTime,
             pos = ply:GetPos(),
-            ang = ply:GetAngles(),
-            view = ply:EyeAngles(),
-            crouching = crouching,
-            walking = walking,
-            jumping = mv:KeyWasDown(IN_JUMP) and not ply:OnGround(),
-            jumpPower = jumpPower,
-            speed = speed,
-            seq = layers,
-            weapon = {}
+            time = CurTime()
         }
-        mv_last[sid64] = curTime
 
         local activeWep = ply:GetActiveWeapon()
         if IsValid(activeWep) and activeWep ~= NULL then
-            mvData.weapon.model = activeWep.WorldModel
-            mvData.weapon.holdType = activeWep.HoldType
+            mvData.wep = activeWep.WorldModel
         end
 
+        local sid64 = ply:SteamID64()
         -- This player already has one or more clones, update them
         if mv_start[sid64] == false then
             if ply.RdmtCosmicClones then

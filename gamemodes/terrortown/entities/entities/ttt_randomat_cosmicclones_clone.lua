@@ -1,223 +1,125 @@
 AddCSLuaFile()
 
-ENT.Base           = "base_nextbot"
-ENT.Spawnable      = true
+local ents = ents
+local table = table
+
+local EntsCreate = ents.Create
+local TableInsert = table.insert
+local TableRemove = table.remove
+
+ENT.FakeWep        = nil
+ENT.MoveData       = {}
+
+ENT.Base           = "base_anim"
 
 if CLIENT then
-    ENT.PrintName = "Cosmic Clone"
+    ENT.PrintName  = "Cosmic Clone"
 end
 
 function ENT:Initialize()
     self:SetMoveType(SOLID_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     self:SetCollisionBounds(Vector(-16, -16, 0), Vector(16, 16, 84))
+    self:SetNoDraw(true)
 end
 
-if SERVER then
-    local coroutine = coroutine
-    local ents = ents
-    local math = math
-    local table = table
+function ENT:SetupDataTables()
+ 	self:NetworkVar("String", "CloneOf")
+end
 
-    local EntsCreate = ents.Create
-    local MathCeil = math.ceil
-    local TableInsert = table.insert
-    local TableRemove = table.remove
+function ENT:OnRemove(fullUpdate)
+    SafeRemoveEntity(self.FakeWep)
+    self.FakeWep = nil
+end
 
-    ENT.PositionTolerance = 50
-    ENT.FakeWep           = nil
-    ENT.MoveData          = {}
-    ENT.CloneOf           = nil
+function ENT:UpdateWeaponModel(model)
+    if not model then return end
 
-    function ENT:GetMovementSequence(idle, mvData)
-        if not mvData.weapon.holdType then
-            return self:SelectWeightedSequence(ACT_RESET)
-        end
-
-        local actType
-        if mvData.jumping then
-            actType = "JUMP"
-        elseif idle then
-            actType = "IDLE"
-            if mvData.crouching then
-                actType = actType .. "_CROUCH"
-            end
-        elseif mvData.crouching then
-            actType = "WALK_CROUCH"
-        elseif mvData.walking then
-            actType = "WALK"
+    if not self.FakeWep then
+        local attachment
+        local lookup = self:LookupAttachment("anim_attachment_RH")
+        if lookup == 0 then
+            attachment = { Pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 5), Ang = self:GetForward():Angle() + Angle(20, 0, 0) }
         else
-            actType = "RUN"
+            attachment = self:GetAttachment(lookup)
         end
 
-        local holdType = "_" .. string.upper(mvData.weapon.holdType)
-        if holdType == "_SMG" then
-            holdType = "_SMG1"
-        end
-        if holdType == "_NORMAL" then
-            holdType = ""
-        end
-        return self:SelectWeightedSequence(_G["ACT_HL2MP_" .. actType .. holdType] or ACT_RESET)
+        -- Create the Fake weapon
+        self.FakeWep = EntsCreate("base_anim")
+        self.FakeWep:SetOwner(self)
+        self.FakeWep:AddEffects(EF_BONEMERGE)
+        self.FakeWep:SetMoveType(MOVETYPE_NONE)
+        self.FakeWep:SetPos(attachment.Pos)
+        self.FakeWep:SetAngles(attachment.Ang)
+        self.FakeWep:SetParent(self)
     end
 
-    function ENT:OnRemove(fullUpdate)
-        SafeRemoveEntity(self.FakeWep)
-        self.FakeWep = nil
-    end
-
-    function ENT:UpdateWeaponModel(model)
-        if not model then return end
-
-        if not self.FakeWep then
-            local attachment
-            local lookup = self:LookupAttachment("anim_attachment_RH")
-            if lookup == 0 then
-                attachment = { Pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 5), Ang = self:GetForward():Angle() + Angle(20, 0, 0) }
-            else
-                attachment = self:GetAttachment(lookup)
-            end
-
-            -- Create the Fake weapon
-            self.FakeWep = EntsCreate("base_anim")
-            self.FakeWep:SetOwner(self)
-            self.FakeWep:AddEffects(EF_BONEMERGE)
-            self.FakeWep:SetMoveType(MOVETYPE_NONE)
-            self.FakeWep:SetPos(attachment.Pos)
-            self.FakeWep:SetAngles(attachment.Ang)
-            self.FakeWep:SetParent(self)
+    if not util.IsValidModel(model) then
+        self.FakeWep:SetNoDraw(true)
+    else
+        if self.FakeWep:GetNoDraw() then
+            self.FakeWep:SetNoDraw(false)
         end
 
-        if not util.IsValidModel(model) then
-            self.FakeWep:SetNoDraw(true)
-        else
-            if self.FakeWep:GetNoDraw() then
-                self.FakeWep:SetNoDraw(false)
-            end
-
-            if self.FakeWep:GetModel() ~= model then
-                self.FakeWep:SetModel(model)
-            end
+        if self.FakeWep:GetModel() ~= model then
+            self.FakeWep:SetModel(model)
         end
     end
+end
 
-    function ENT:RunBehaviour()
-        local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
-        local rate = GetConVar("randomat_cosmicclones_rate"):GetInt()
+function ENT:Think()
+    local idx, mvData = next(self.MoveData)
+    -- Sanity check
+    if not mvData then return end
 
-        while (true) do
-            local idx, mvData = next(self.MoveData)
-            -- Sanity check
-            if not mvData then
-                coroutine.yield()
-                continue
-            end
+    -- Have to do it this way because setting the index to nil causes inserts
+    -- to overwrite previously nil-ed values which causes the bot to move
+    -- to the places in the wrong order
+    TableRemove(self.MoveData, idx)
 
-            -- Only do the actions after the appropriate delay
-            if (CurTime() - mvData.time) < delay then
-                coroutine.yield()
-                continue
-            end
-
-            -- Have to do it this way because setting the index to nil causes inserts
-            -- to overwrite previously nil-ed values which causes the bot to move
-            -- to the places in the wrong order
-            TableRemove(self.MoveData, idx)
-
-            self:UpdateWeaponModel(mvData.weapon.model)
-            self:SetPoseParameter("aim_yaw", mvData.view.yaw)
-            self:SetPoseParameter("aim_pitch", mvData.view.pitch)
-            -- TODO: This gets overwritten by the movement logic. How do we make them move backwards?
-            self:SetAngles(mvData.ang)
-
-            -- If we're close enough to the position, just idle for a bit
-            local idle = self:GetRangeSquaredTo(mvData.pos) < self.PositionTolerance
-
-            -- Remove all the old layers
-            for i = 0, MAX_OVERLAYS do
-                self:RemoveLayer(i)
-            end
-
-            -- Play the movement sequence
-            local seq = self:GetMovementSequence(idle, mvData)
-            self:AddLayeredSequence(seq, 1)
-
-            -- And any other layers below that
-            for i, s in ipairs(mvData.seq) do
-                self:AddLayeredSequence(s.id, 2 + i)
-            end
-
-            -- TODO: Make them move up like they are jumping
-            if mvData.jumping then
-                local vel = self.loco:GetVelocity()
-                vel.z = mvData.jumpPower
-                self.loco:SetVelocity(vel)
-
-                vel = self:GetVelocity()
-                vel.z = mvData.jumpPower
-                self:SetVelocity(vel)
-            end
-
-            if not idle then
-                self.loco:SetDesiredSpeed(mvData.speed)
-                --[[local result = ]]self:MoveToPos(mvData.pos, {
-                    lookahead = 100,
-                    tolerance = 10,
-                    draw = false,
-                    -- Stop this a little early to try and blend into the next movement
-                    maxage = rate * 0.8
-                })
-
-                -- TODO: If they are stuck, try teleporting them since these should be small increments anyway
-                --if result == "stuck" or result == "failed" then
-                --    self:SetPos(mvData.pos)
-                --end
-            end
-
-            coroutine.yield()
-        end
-    end
-
-    ENT.LastAdded = nil
-    function ENT:AddMoveData(mvData)
-        -- Ignore duplicates
-        if self.LastAdded and
-            self.LastAdded.pos:IsEqualTol(mvData.pos, 0) and
-            self.LastAdded.ang:IsEqualTol(mvData.ang, 0) and
-            (self.LastAdded.crouching == mvData.crouching) and
-            (self.LastAdded.walking == mvData.walking) and
-            (self.LastAdded.speed == mvData.speed) and
-            (self.LastAdded.weapon.model == mvData.weapon.model) and
-            (self.LastAdded.weapon.holdType == mvData.weapon.holdType) then
-            return
+    if CLIENT then
+        self:SetNoDraw(false)
+        self:SetPos(mvData.pos)
+        self:SetAngles(mvData.ang)
+        self:SetCycle(mvData.cyc)
+        self:SetSequence(mvData.seq)
+        -- TODO: This doesn't handle weapon attacking like swinging the crowbar
+        for _, pose in ipairs(mvData.poses) do
+            self:SetPoseParameter(pose.name, pose.val)
         end
 
-        -- If this is our first entry, set the initial weapon model
-        if not self.LastAdded then
-            self:UpdateWeaponModel(mvData.weapon.model)
-        end
-
-        self.LastAdded = mvData
-        TableInsert(self.MoveData, mvData)
+        self:SetNextClientThink(CurTime() + engine.TickInterval())
+    else
+        -- TODO: This doesn't work because the server position doesn't update. Updating the server position causes rubberbanding because it desyncs from the client
+        --local distSqr = 32*32
+        --for _, p in player.Iterator() do
+        --    if p:GetPos():DistToSqr(mvData.pos) <= distSqr then
+        --        local damage = p:Health()
+        --        local att = player.GetBySteamID64(self:GetCloneOf())
+        --        if not IsValid(att) or Randomat:ShouldActLikeJester(att) then
+        --            att = game.GetWorld()
+        --        else
+        --            -- Boost this enough to compensate for the attacker's karma
+        --            damage = damage * (1 + (1 - att:GetDamageFactor()))
+        --        end
+        --        -- Kill whoever touches the clone
+        --        local dmginfo = DamageInfo()
+        --        dmginfo:SetAttacker(att)
+        --        dmginfo:SetInflictor(self)
+        --        dmginfo:SetDamagePosition(self:GetPos())
+        --        dmginfo:SetDamageType(DMG_DIRECT)
+        --        dmginfo:SetDamage(math.ceil(damage))
+        --        dmginfo:SetDamageForce(Vector(0, 0, 1))
+        --        ent:TakeDamageInfo(dmginfo)
+        --    end
+        --end
+        self:UpdateWeaponModel(mvData.wep)
     end
+    self:NextThink(CurTime() + engine.TickInterval())
 
-    function ENT:OnContact(ent)
-        if not IsPlayer(ent) then return end
-        if not IsPlayer(self.CloneOf) then return end
+    return true
+end
 
-        -- Kill whoever touches the clone
-        local dmginfo = DamageInfo()
-        dmginfo:SetAttacker(self.CloneOf)
-        dmginfo:SetInflictor(self)
-        dmginfo:SetDamagePosition(self:GetPos())
-        dmginfo:SetDamageType(DMG_DIRECT)
-        -- Boost this enough to compensate for the attacker's karma
-        local damage = ent:Health() * (1 + (1 - self.CloneOf:GetDamageFactor()))
-        dmginfo:SetDamage(MathCeil(damage))
-        dmginfo:SetDamageForce(Vector(0, 0, 1))
-        ent:TakeDamageInfo(dmginfo)
-    end
-
-    function ENT:BodyUpdate()
-        self:BodyMoveXY()
-    end
+function ENT:AddMoveData(mvData)
+    TableInsert(self.MoveData, mvData)
 end
