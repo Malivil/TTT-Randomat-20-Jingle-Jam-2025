@@ -165,7 +165,13 @@ if SERVER then
 
             if self.FakeWep:GetModel() ~= model then
                 self.FakeWep:SetModel(model)
+            end
+
+            if self.FakeWep:GetColor() ~= darkRed then
                 self.FakeWep:SetColor(darkRed)
+            end
+
+            if self.FakeWep:GetMaterial() ~= "!RdmtCosmicCloneMaterial" then
                 self.FakeWep:SetMaterial("!RdmtCosmicCloneMaterial")
             end
         end
