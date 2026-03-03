@@ -98,7 +98,6 @@ function EVENT:Begin()
 
         local mvData = {
             pos = ply:GetPos(),
-            -- TODO: Remove this?
             time = curTime
         }
 
