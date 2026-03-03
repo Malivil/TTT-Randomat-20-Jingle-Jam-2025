@@ -43,16 +43,20 @@ function ENT:Think()
     print(curTime, mvData.time, curTime - mvData.time, self:GetDelay(), #self.MoveData, curTime - (self.LastThink or 0))
     self.LastThink = curTime
 
-    -- TODO: Do we need this? If not, we can remove the networked "Delay" entirely
-    -- Make sure we're waiting long enough
-    --if (curTime - mvData.time) < self:GetDelay() then return end
+    local synchronized = false
+    while not synchronized do
+        TableRemove(self.MoveData, idx)
+        local nextIdx, nextMvData = next(self.MoveData)
 
-    -- Have to do it this way because setting the index to nil causes inserts
-    -- to overwrite previously nil-ed values which causes the bot to move
-    -- to the places in the wrong order
-    TableRemove(self.MoveData, idx)
+        -- If the next move happened too long ago then skip it and try again
+        if curTime - mvData.time <= self:GetDelay() then
+            synchronized = true
+        else
+            idx = nextIdx
+            mvData = nextMvData
+        end
+    end
 
-    -- TODO: This de-syncs because the client runs slower every iteration of ENT:Think
     self:SetPos(mvData.pos)
     if CLIENT then
         self:SetNoDraw(false)
