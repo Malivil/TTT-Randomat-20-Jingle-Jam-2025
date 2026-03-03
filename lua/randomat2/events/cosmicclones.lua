@@ -39,7 +39,7 @@ local function CreateClone(ply, pos, ang, delay)
         clone:SetBodygroup(value.id, ply:GetBodygroup(value.id))
     end
     clone:SetColor(darkRed)
-    clone:SetMaterial("models/shiny")
+    clone:SetMaterial("!RdmtCosmicCloneMaterial")
     clone:SetCloneOf(ply:SteamID64())
     clone:SetDelay(delay)
     clone:Spawn()

@@ -16,6 +16,16 @@ ENT.Base           = "base_anim"
 
 if CLIENT then
     ENT.PrintName  = "Cosmic Clone"
+    CreateMaterial("RdmtCosmicCloneMaterial", "VertexLitGeneric", {
+        ["$basetexture"] = "vgui/white",
+        ["$model"] = 1,
+        ["$translucent"] = 1,
+        ["$vertexalpha"] = 1,
+        ["$vertexcolor"] = 1,
+        ["$cloakpassenabled"] = 1,
+        ["$cloakfactor"] = 0.31,
+        ["$cloakcolortint"] = 0
+    })
 end
 
 function ENT:Initialize()
