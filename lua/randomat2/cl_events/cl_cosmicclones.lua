@@ -5,6 +5,8 @@ local player = player
 local table = table
 
 local EntsFindByClass = ents.FindByClass
+local MathRand = math.Rand
+local MathRandom = math.random
 local MathRound = math.Round
 local MathRemap = math.Remap
 local PlayerIterator = player.Iterator
@@ -13,6 +15,8 @@ local TableInsert = table.insert
 local EVENT = {}
 EVENT.id = "cosmicclones"
 
+-- This is darker than the player color
+local particleRed = Color(65, 0, 0)
 local tickRate
 local moveStart = {}
 local moveLast = {}
@@ -28,6 +32,8 @@ function EVENT:Begin()
     tickRate = math.Round(engine.TickInterval(), 3)
     moveStart = {}
     moveLast = {}
+
+    local client = LocalPlayer()
 
     CreateMaterial("RdmtCosmicCloneMaterial", "VertexLitGeneric", {
         ["$basetexture"] = "vgui/white",
@@ -74,7 +80,6 @@ function EVENT:Begin()
         if moveStart[sid64] == false then
             if ply.RdmtCosmicClones then
                 for _, c in ipairs(ply.RdmtCosmicClones) do
-                    print(c)
                     if not IsValid(c) then continue end
                     c:AddMoveData(mvData)
                 end
@@ -100,6 +105,10 @@ function EVENT:Begin()
                     clone:AddMoveData(d)
                 end
 
+                if moveStart[sid64].SmokeEmitter then
+                    moveStart[sid64].SmokeEmitter:Finish()
+                    moveStart[sid64].SmokeEmitter = nil
+                end
                 moveStart[sid64] = false
                 moveLast[sid64] = nil
 
@@ -109,6 +118,40 @@ function EVENT:Begin()
                 TableInsert(ply.RdmtCosmicClones, clone)
             else
                 TableInsert(moveStart[sid64].moves, mvData)
+            end
+        end
+    end)
+
+    -- Show smoke where a clone is going to spawn
+    self:AddHook("Think", function()
+        if not IsPlayer(client) then return end
+
+        local curTime = CurTime()
+        local baseVel = Vector(0, 0, 4)
+        for sid64, mv in pairs(moveStart) do
+            if mv == false then continue end
+
+            local ply = player.GetBySteamID64(sid64)
+            if not IsPlayer(ply) then continue end
+
+            local pos = mv.moves[1].pos
+            if not mv.SmokeEmitter then mv.SmokeEmitter = ParticleEmitter(pos) end
+            if not mv.SmokeNextPart then mv.SmokeNextPart = curTime end
+            if mv.SmokeNextPart < curTime and client:GetPos():Distance(pos) <= 3000 then
+                mv.SmokeEmitter:SetPos(pos)
+                mv.SmokeNextPart = curTime + MathRand(0.003, 0.01)
+                local vec = Vector(MathRand(-8, 8), MathRand(-8, 8), MathRand(10, 55))
+                local localVec, _ = LocalToWorld(pos, angle_zero, vec, angle_zero)
+                local particle = mv.SmokeEmitter:Add("particle/snow.vmt", localVec)
+                particle:SetVelocity(baseVel + VectorRand() * 3)
+                particle:SetDieTime(MathRand(0.75, 2.25))
+                local size = MathRandom(4, 7)
+                particle:SetStartSize(size)
+                particle:SetEndSize(size + 1)
+                particle:SetRoll(0)
+                particle:SetRollDelta(0)
+                local r, g, b, _ = particleRed:Unpack()
+                particle:SetColor(r, g, b)
             end
         end
     end)
