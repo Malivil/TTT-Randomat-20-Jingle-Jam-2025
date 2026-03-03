@@ -29,6 +29,17 @@ function EVENT:Begin()
     moveStart = {}
     moveLast = {}
 
+    CreateMaterial("RdmtCosmicCloneMaterial", "VertexLitGeneric", {
+        ["$basetexture"] = "vgui/white",
+        ["$model"] = 1,
+        ["$translucent"] = 1,
+        ["$vertexalpha"] = 1,
+        ["$vertexcolor"] = 1,
+        ["$cloakpassenabled"] = 1,
+        ["$cloakfactor"] = 0.31,
+        ["$cloakcolortint"] = 0
+    })
+
     self:AddHook("SetupMove", function(ply, mv, cmd)
         -- TODO: Remove
         if ply:IsBot() then return end
