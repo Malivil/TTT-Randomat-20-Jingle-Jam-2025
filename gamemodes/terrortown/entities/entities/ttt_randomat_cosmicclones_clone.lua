@@ -16,16 +16,6 @@ ENT.Base           = "base_anim"
 
 if CLIENT then
     ENT.PrintName  = "Cosmic Clone"
-    CreateMaterial("RdmtCosmicCloneMaterial", "VertexLitGeneric", {
-        ["$basetexture"] = "vgui/white",
-        ["$model"] = 1,
-        ["$translucent"] = 1,
-        ["$vertexalpha"] = 1,
-        ["$vertexcolor"] = 1,
-        ["$cloakpassenabled"] = 1,
-        ["$cloakfactor"] = 0.31,
-        ["$cloakcolortint"] = 0
-    })
 end
 
 function ENT:Initialize()
@@ -133,7 +123,6 @@ if SERVER then
         self.FakeWep = nil
     end
 
-    local darkRed = Color(136, 0, 0)
     function ENT:UpdateWeaponModel(model)
         if not model then return end
 
@@ -167,12 +156,12 @@ if SERVER then
                 self.FakeWep:SetModel(model)
             end
 
-            if self.FakeWep:GetColor() ~= darkRed then
-                self.FakeWep:SetColor(darkRed)
+            if self.FakeWep:GetColor() ~= self:GetColor() then
+                self.FakeWep:SetColor(self:GetColor())
             end
 
-            if self.FakeWep:GetMaterial() ~= "!RdmtCosmicCloneMaterial" then
-                self.FakeWep:SetMaterial("!RdmtCosmicCloneMaterial")
+            if self.FakeWep:GetMaterial() ~= self:GetMaterial() then
+                self.FakeWep:SetMaterial(self:GetMaterial())
             end
         end
     end
