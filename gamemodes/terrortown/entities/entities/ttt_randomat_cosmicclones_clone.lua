@@ -16,6 +16,16 @@ ENT.Base           = "base_anim"
 
 if CLIENT then
     ENT.PrintName  = "Cosmic Clone"
+    CreateMaterial("RdmtCosmicCloneMaterial", "VertexLitGeneric", {
+        ["$basetexture"] = "vgui/white",
+        ["$model"] = 1,
+        ["$translucent"] = 1,
+        ["$vertexalpha"] = 1,
+        ["$vertexcolor"] = 1,
+        ["$cloakpassenabled"] = 1,
+        ["$cloakfactor"] = 0.31,
+        ["$cloakcolortint"] = 0
+    })
 end
 
 function ENT:Initialize()
@@ -43,16 +53,20 @@ function ENT:Think()
     print(curTime, mvData.time, curTime - mvData.time, self:GetDelay(), #self.MoveData, curTime - (self.LastThink or 0))
     self.LastThink = curTime
 
-    -- TODO: Do we need this? If not, we can remove the networked "Delay" entirely
-    -- Make sure we're waiting long enough
-    --if (curTime - mvData.time) < self:GetDelay() then return end
+    local synchronized = false
+    while not synchronized do
+        TableRemove(self.MoveData, idx)
+        local nextIdx, nextMvData = next(self.MoveData)
 
-    -- Have to do it this way because setting the index to nil causes inserts
-    -- to overwrite previously nil-ed values which causes the bot to move
-    -- to the places in the wrong order
-    TableRemove(self.MoveData, idx)
+        -- If the next move happened too long ago then skip it and try again
+        if curTime - mvData.time <= self:GetDelay() then
+            synchronized = true
+        else
+            idx = nextIdx
+            mvData = nextMvData
+        end
+    end
 
-    -- TODO: This de-syncs because the client runs slower every iteration of ENT:Think
     self:SetPos(mvData.pos)
     if CLIENT then
         self:SetNoDraw(false)
@@ -119,6 +133,7 @@ if SERVER then
         self.FakeWep = nil
     end
 
+    local darkRed = Color(136, 0, 0)
     function ENT:UpdateWeaponModel(model)
         if not model then return end
 
@@ -150,6 +165,14 @@ if SERVER then
 
             if self.FakeWep:GetModel() ~= model then
                 self.FakeWep:SetModel(model)
+            end
+
+            if self.FakeWep:GetColor() ~= darkRed then
+                self.FakeWep:SetColor(darkRed)
+            end
+
+            if self.FakeWep:GetMaterial() ~= "!RdmtCosmicCloneMaterial" then
+                self.FakeWep:SetMaterial("!RdmtCosmicCloneMaterial")
             end
         end
     end
