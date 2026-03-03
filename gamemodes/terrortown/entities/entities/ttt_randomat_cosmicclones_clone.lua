@@ -133,6 +133,7 @@ if SERVER then
         self.FakeWep = nil
     end
 
+    local darkRed = Color(136, 0, 0)
     function ENT:UpdateWeaponModel(model)
         if not model then return end
 
@@ -164,6 +165,8 @@ if SERVER then
 
             if self.FakeWep:GetModel() ~= model then
                 self.FakeWep:SetModel(model)
+                self.FakeWep:SetColor(darkRed)
+                self.FakeWep:SetMaterial("!RdmtCosmicCloneMaterial")
             end
         end
     end
