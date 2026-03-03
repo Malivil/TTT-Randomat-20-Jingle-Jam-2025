@@ -47,6 +47,9 @@ function ENT:Think()
     while not synchronized do
         TableRemove(self.MoveData, idx)
         local nextIdx, nextMvData = next(self.MoveData)
+        -- Sanity check
+        -- TODO: Should we "return" instead of break? This happened once in testing
+        if not nextMvData then break end
 
         -- If the next move happened too long ago then skip it and try again
         if curTime - mvData.time <= self:GetDelay() then
@@ -79,9 +82,6 @@ end
 
 ENT.LastAdded = nil
 function ENT:AddMoveData(mvData)
-    if CLIENT then
-        print(self, "AMD")
-    end
     -- Don't allow duplicate values
     if self.LastAdded then
         local samePos = self.LastAdded.pos:IsEqualTol(mvData.pos, 0)
