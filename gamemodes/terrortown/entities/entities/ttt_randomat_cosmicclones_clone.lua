@@ -33,15 +33,14 @@ function ENT:SetupDataTables()
  	self:NetworkVar("Int", "Delay")
 end
 
-ENT.LastThink = nil
 function ENT:Think()
     local idx, mvData = next(self.MoveData)
     -- Sanity check
     if not mvData then return end
 
-    local curTime = CurTime()
-    print(curTime, mvData.time, curTime - mvData.time, self:GetDelay(), #self.MoveData, curTime - (self.LastThink or 0))
-    self.LastThink = curTime
+    -- If we're less than 98% of the set delay (e.g. 4.9 for a 5 second delay)
+    -- then just wait longer =)
+    if (curTime - mvData.time) < (self:GetDelay() * 0.98) then return end
 
     local synchronized = false
     while not synchronized do
