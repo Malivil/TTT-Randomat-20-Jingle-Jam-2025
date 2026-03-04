@@ -83,77 +83,79 @@ function EVENT:Begin()
         ClearClones(ply)
     end)
 
-    self:AddHook("SetupMove", function(ply, mv, cmd)
-        local sid64 = ply:SteamID64()
-        if not ply:Alive() or ply:IsSpec() then
-            moveStart[sid64] = nil
-            return
-        end
-
+    self:AddHook("Think", function()
         local curTime = CurTime()
-        if moveLast[sid64] then
-            local diff = MathRound(curTime - moveLast[sid64], 3)
-            if diff < tickRate then return end
-        end
-
-        moveLast[sid64] = curTime
-
-        local mvData = {
-            pos = ply:GetPos(),
-            time = curTime
-        }
-
-        local activeWep = ply:GetActiveWeapon()
-        if IsValid(activeWep) and activeWep ~= NULL then
-            mvData.wep = activeWep.WorldModel
-        end
-
-        -- Start waiting to create the clone
-        if not moveStart[sid64] then
-            moveStart[sid64] = {
-                count = count,
-                pos = ply:GetPos(),
-                ang = ply:GetAngles(),
-                moves = {
-                    [1] = mvData
-                }
-            }
-
-            timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, count, function()
-                if not IsValid(ply) then return end
-
-                -- Create the clone and pass any move history that we have
-                -- Each successive clone should get another stack of delay
-                -- We track this by comparing how many clones we've created
-                -- versus the total, and adding 1 to make the baseline 1x
-                -- For 2 clones, the 1st clone would be:
-                --    delayMult = 1 + (2 - 2) = 1
-                -- And the second clone would be
-                --    delayMult = 1 + (2 - 1) = 2
-                local delayMult = 1 + (count - moveStart[sid64].count)
-                local clone = CreateClone(ply, moveStart[sid64].pos, moveStart[sid64].ang, delay * delayMult)
-                for _, d in ipairs(moveStart[sid64].moves) do
-                    clone:AddMoveData(d)
-                end
-
-                moveStart[sid64].count = moveStart[sid64].count - 1
-
-                if not ply.RdmtCosmicClones then
-                    ply.RdmtCosmicClones = {}
-                end
-                TableInsert(ply.RdmtCosmicClones, clone)
-            end)
-        else
-            -- This player already has one or more clones, update them
-            if ply.RdmtCosmicClones then
-                for _, c in ipairs(ply.RdmtCosmicClones) do
-                    c:AddMoveData(mvData)
-                end
+        for _, ply in PlayerIterator() do
+            local sid64 = ply:SteamID64()
+            if not ply:Alive() or ply:IsSpec() then
+                moveStart[sid64] = nil
+                continue
             end
 
-            -- Keep track of any move data while clones are being created
-            if moveStart[sid64].count > 0 then
-                TableInsert(moveStart[sid64].moves, mvData)
+            if moveLast[sid64] then
+                local diff = MathRound(curTime - moveLast[sid64], 3)
+                if diff < tickRate then continue end
+            end
+
+            moveLast[sid64] = curTime
+
+            local mvData = {
+                pos = ply:GetPos(),
+                time = curTime
+            }
+
+            local activeWep = ply:GetActiveWeapon()
+            if IsValid(activeWep) and activeWep ~= NULL then
+                mvData.wep = activeWep.WorldModel
+            end
+
+            -- Start waiting to create the clone
+            if not moveStart[sid64] then
+                moveStart[sid64] = {
+                    count = count,
+                    pos = ply:GetPos(),
+                    ang = ply:GetAngles(),
+                    moves = {
+                        [1] = mvData
+                    }
+                }
+
+                timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, count, function()
+                    if not IsValid(ply) then return end
+
+                    -- Create the clone and pass any move history that we have
+                    -- Each successive clone should get another stack of delay
+                    -- We track this by comparing how many clones we've created
+                    -- versus the total, and adding 1 to make the baseline 1x
+                    -- For 2 clones, the 1st clone would be:
+                    --    delayMult = 1 + (2 - 2) = 1
+                    -- And the second clone would be
+                    --    delayMult = 1 + (2 - 1) = 2
+                    local delayMult = 1 + (count - moveStart[sid64].count)
+                    local clone = CreateClone(ply, moveStart[sid64].pos, moveStart[sid64].ang, delay * delayMult)
+                    for _, d in ipairs(moveStart[sid64].moves) do
+                        clone:AddMoveData(d)
+                    end
+
+                    moveStart[sid64].count = moveStart[sid64].count - 1
+
+                    if not ply.RdmtCosmicClones then
+                        ply.RdmtCosmicClones = {}
+                    end
+                    TableInsert(ply.RdmtCosmicClones, clone)
+                end)
+            else
+                -- This player already has one or more clones, update them
+                if ply.RdmtCosmicClones then
+                    for _, c in ipairs(ply.RdmtCosmicClones) do
+                        c:AddMoveData(mvData)
+                    end
+                end
+
+                -- Keep track of any move data while clones are being created
+                if moveStart[sid64].count > 0 then
+                    TableInsert(moveStart[sid64].moves, mvData)
+                end
             end
         end
     end)
