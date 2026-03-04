@@ -9,21 +9,22 @@ local TableCount = table.Count
 local TableInsert = table.insert
 local TableRemove = table.remove
 
-ENT.FakeWep       = nil
-ENT.MoveData      = {}
+ENT.FakeWep              = nil
+ENT.MoveData             = {}
 
-ENT.Base          = "base_anim"
+ENT.Base                 = "base_anim"
 
 if CLIENT then
-    ENT.PrintName = "Cosmic Clone"
+    ENT.PrintName        = "Cosmic Clone"
+    ENT.PositionCallback = nil
 else
-    ENT.IsDead    = false
+    ENT.IsDead           = false
 end
 
-ENT.CloneColor    = Color(136, 0, 0)
-ENT.CloneMaterial = "!RdmtCosmicCloneMaterial"
-ENT.DeadColor     = Color(255, 255, 255, 0)
-ENT.DeadMaterial  = ""
+ENT.CloneColor           = Color(136, 0, 0)
+ENT.CloneMaterial        = "!RdmtCosmicCloneMaterial"
+ENT.DeadColor            = Color(255, 255, 255, 0)
+ENT.DeadMaterial         = ""
 
 function ENT:Initialize()
     self:SetMoveType(SOLID_NONE)
@@ -49,7 +50,7 @@ function ENT:Think()
 
     local curTime = CurTime()
 
-    --print(curTime, mvData.time, curTime - mvData.time, mvData.dead)
+    print(curTime, mvData.time, curTime - mvData.time, mvData.dead)
 
     -- If we're less than 98% of the set delay (e.g. 4.9 for a 5 second delay)
     -- then just wait longer =)
@@ -83,6 +84,9 @@ function ENT:Think()
     self:SetVisible(true)
     self:SetPos(mvData.pos)
     if CLIENT then
+        if self.PositionCallback then
+            self.PositionCallback(self, mvData.pos)
+        end
         self:SetAngles(mvData.ang)
         self:SetCycle(mvData.cyc)
         self:SetSequence(mvData.seq)

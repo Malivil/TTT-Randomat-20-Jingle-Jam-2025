@@ -24,7 +24,6 @@ local moveStart = {}
 local moveLast = {}
 
 -- TODO: Animations stop after each next clone spawns (data stops sending)
--- TODO: Smoke doesn't move to the new spawn location on death
 
 function EVENT:Begin()
     local count = GetConVar("randomat_cosmicclones_count"):GetInt()
@@ -93,6 +92,14 @@ function EVENT:Begin()
                         count = count,
                         moves = {
                             [1] = mvData
+                        },
+                        spawns = {
+                            -- This structure seems overly complicated, but
+                            -- each entry will have its own smoke emitter
+                            -- added below so an object is necessary here
+                            [1] = {
+                                pos = mvData.pos
+                            }
                         }
                     }
                 end
@@ -110,20 +117,23 @@ function EVENT:Begin()
 
                     -- If we found one, update its known state and the start information for this player
                     if clone then
+                        moveStart[sid64].count = moveStart[sid64].count - 1
+
                         clone.RdmtCosmicCloneKnown = true
+                        clone.RdmtCosmicCloneNum = count - moveStart[sid64].count
+                        clone.PositionCallback = function(c, p)
+                            if c.RdmtCosmicCloneNum ~= count then return end
+                            if #moveStart[sid64].spawns == 0 then return end
+                            if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 10) then return end
+
+                            local spawn = TableRemove(moveStart[sid64].spawns, 1)
+                            if spawn.SmokeEmitter then
+                                spawn.SmokeEmitter:Finish()
+                            end
+                        end
 
                         for _, d in ipairs(moveStart[sid64].moves) do
                             clone:AddMoveData(d)
-                        end
-
-                        moveStart[sid64].count = moveStart[sid64].count - 1
-                        if moveStart[sid64].count == 0 then
-                            if moveStart[sid64].SmokeEmitter then
-                                moveStart[sid64].SmokeEmitter:Finish()
-                            end
-
-                            moveStart[sid64].SmokeEmitter = nil
-                            moveStart[sid64].SmokeNextPart = nil
                         end
 
                         if not ply.RdmtCosmicClones then
@@ -154,31 +164,31 @@ function EVENT:Begin()
         if not IsPlayer(client) then return end
 
         for sid64, mv in pairs(moveStart) do
-            if not mv then continue end
-            -- TODO: Make this work with respawn moves
-            if mv.count == 0 then continue end
+            if #mv.spawns == 0 then continue end
 
             local ply = player.GetBySteamID64(sid64)
             if not IsPlayer(ply) then continue end
 
-            local pos = mv.moves[1].pos
-            if not mv.SmokeEmitter then mv.SmokeEmitter = ParticleEmitter(pos) end
-            if not mv.SmokeNextPart then mv.SmokeNextPart = curTime end
-            if mv.SmokeNextPart < curTime and client:GetPos():Distance(pos) <= 3000 then
-                mv.SmokeEmitter:SetPos(pos)
-                mv.SmokeNextPart = curTime + MathRand(0.003, 0.01)
-                local vec = Vector(MathRand(-8, 8), MathRand(-8, 8), MathRand(10, 55))
-                local localVec, _ = LocalToWorld(pos, angle_zero, vec, angle_zero)
-                local particle = mv.SmokeEmitter:Add("particle/snow.vmt", localVec)
-                particle:SetVelocity(particleBaseVel + VectorRand() * 3)
-                particle:SetDieTime(MathRand(0.75, 2.25))
-                local size = MathRandom(4, 7)
-                particle:SetStartSize(size)
-                particle:SetEndSize(size + 1)
-                particle:SetRoll(0)
-                particle:SetRollDelta(0)
-                local r, g, b, _ = particleRed:Unpack()
-                particle:SetColor(r, g, b)
+            for _, spawn in ipairs(mv.spawns) do
+                local pos = spawn.pos
+                if not spawn.SmokeEmitter then spawn.SmokeEmitter = ParticleEmitter(pos) end
+                if not spawn.SmokeNextPart then spawn.SmokeNextPart = curTime end
+                if spawn.SmokeNextPart < curTime and client:GetPos():Distance(pos) <= 3000 then
+                    spawn.SmokeEmitter:SetPos(pos)
+                    spawn.SmokeNextPart = curTime + MathRand(0.003, 0.01)
+                    local vec = Vector(MathRand(-8, 8), MathRand(-8, 8), MathRand(10, 55))
+                    local localVec, _ = LocalToWorld(pos, angle_zero, vec, angle_zero)
+                    local particle = spawn.SmokeEmitter:Add("particle/snow.vmt", localVec)
+                    particle:SetVelocity(particleBaseVel + VectorRand() * 3)
+                    particle:SetDieTime(MathRand(0.75, 2.25))
+                    local size = MathRandom(4, 7)
+                    particle:SetStartSize(size)
+                    particle:SetEndSize(size + 1)
+                    particle:SetRoll(0)
+                    particle:SetRollDelta(0)
+                    local r, g, b, _ = particleRed:Unpack()
+                    particle:SetColor(r, g, b)
+                end
             end
         end
     end)
@@ -203,6 +213,13 @@ function EVENT:Begin()
             end
         end
     end)
+
+    net.Receive("RdmtCosmicCloneRespawn", function()
+        local sid64 = net.ReadString()
+        local pos = net.ReadVector()
+        if not moveStart[sid64] then return end
+        TableInsert(moveStart[sid64].spawns, { pos = pos })
+    end)
 end
 
 function EVENT:End()
@@ -210,6 +227,13 @@ function EVENT:End()
         p.RdmtCosmicClones = nil
     end
 
+    for _, mv in pairs(moveStart) do
+        for _, spawn in ipairs(mv.spawns) do
+            if spawn.SmokeEmitter then
+                spawn.SmokeEmitter:Finish()
+            end
+        end
+    end
     moveStart = {}
     moveLast = {}
 end

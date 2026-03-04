@@ -15,6 +15,7 @@ local TableInsert = table.insert
 local TableRemove = table.remove
 
 util.AddNetworkString("RdmtCosmicCloneDeath")
+util.AddNetworkString("RdmtCosmicCloneRespawn")
 
 local EVENT = {}
 
@@ -77,6 +78,16 @@ function EVENT:Begin()
 
     self:AddHook("PostPlayerDeath", OnPlayerDeath)
     self:AddHook("PlayerDisconnected", OnPlayerDeath)
+    self:AddHook("PlayerSpawn", function(ply, transition)
+        -- Wait a frame for roles that get moved immediately after spawning
+        timer.Simple(0, function()
+            if not IsPlayer(ply) then return end
+            net.Start("RdmtCosmicCloneRespawn")
+                net.WriteString(ply:SteamID64())
+                net.WriteVector(ply:GetPos())
+            net.Broadcast()
+        end)
+    end)
 
     self:AddHook("Think", function()
         local curTime = CurTime()
