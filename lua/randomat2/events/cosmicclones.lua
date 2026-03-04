@@ -12,6 +12,7 @@ local EntsFindByClass = ents.FindByClass
 local MathRound = math.Round
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
+local TableRemove = table.remove
 
 util.AddNetworkString("RdmtCosmicCloneDeath")
 
@@ -83,6 +84,15 @@ function EVENT:Begin()
             if ply:IsBot() then continue end
 
             local sid64 = ply:SteamID64()
+            if moveStart[sid64] then
+                -- Trim all move data that has been sent to all of the clones
+                for idx=#moveStart[sid64].moves, 1, -1 do
+                    if moveStart[sid64].moves[idx].added == count then
+                        TableRemove(moveStart[sid64].moves, idx)
+                    end
+                end
+            end
+
             if not ply:Alive() or ply:IsSpec() then continue end
 
             if moveLast[sid64] then
