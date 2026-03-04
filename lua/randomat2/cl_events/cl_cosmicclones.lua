@@ -11,6 +11,7 @@ local MathRound = math.Round
 local MathRemap = math.Remap
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
+local TableRemove = table.remove
 
 local EVENT = {}
 EVENT.id = "cosmicclones"
@@ -50,6 +51,15 @@ function EVENT:Begin()
             if ply:IsBot() then continue end
 
             local sid64 = ply:SteamID64()
+            if moveStart[sid64] then
+                -- Trim all move data that has been sent to all of the clones
+                for idx=#moveStart[sid64].moves, 1, -1 do
+                    if moveStart[sid64].moves[idx].added == count then
+                        TableRemove(moveStart[sid64].moves, idx)
+                    end
+                end
+            end
+
             local mvData
             if ply:Alive() and not ply:IsSpec() then
                 if moveLast[sid64] then
@@ -145,6 +155,7 @@ function EVENT:Begin()
 
         for sid64, mv in pairs(moveStart) do
             if not mv then continue end
+            -- TODO: Make this work with respawn moves
             if mv.count == 0 then continue end
 
             local ply = player.GetBySteamID64(sid64)

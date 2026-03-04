@@ -49,7 +49,7 @@ function ENT:Think()
 
     local curTime = CurTime()
 
-    print(curTime, mvData.time, curTime - mvData.time, mvData.dead)
+    --print(curTime, mvData.time, curTime - mvData.time, mvData.dead)
 
     -- If we're less than 98% of the set delay (e.g. 4.9 for a 5 second delay)
     -- then just wait longer =)
@@ -103,6 +103,8 @@ end
 
 ENT.LastAdded = nil
 function ENT:AddMoveData(mvData)
+    mvData.added = (mvData.added or 0) + 1
+
     -- Don't allow duplicate values
     if self.LastAdded and not self.LastAdded.dead and not mvData.dead then
         local samePos = self.LastAdded.pos:IsEqualTol(mvData.pos, 0)
