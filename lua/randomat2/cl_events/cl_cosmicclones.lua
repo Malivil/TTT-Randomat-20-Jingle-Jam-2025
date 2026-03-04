@@ -29,6 +29,7 @@ local function ClearClones(ply)
 end
 
 function EVENT:Begin()
+    local count = GetConVar("randomat_cosmicclones_count"):GetInt()
     tickRate = math.Round(engine.TickInterval(), 3)
     moveStart = {}
     moveLast = {}
@@ -47,12 +48,13 @@ function EVENT:Begin()
     })
 
     self:AddHook("SetupMove", function(ply, mv, cmd)
-        -- TODO: Remove
-        if ply:IsBot() then return end
-        if not ply:Alive() or ply:IsSpec() then return end
+        local sid64 = ply:SteamID64()
+        if not ply:Alive() or ply:IsSpec() then
+            moveStart[sid64] = nil
+            return
+        end
 
         local curTime = CurTime()
-        local sid64 = ply:SteamID64()
         if moveLast[sid64] then
             local diff = MathRound(curTime - moveLast[sid64], 3)
             if diff < tickRate then return end
@@ -76,47 +78,61 @@ function EVENT:Begin()
             poses = poses
         }
 
-        -- This player already has one or more clones, update them
-        if moveStart[sid64] == false then
+        -- Start waiting to create the clone
+        if not moveStart[sid64] then
+            moveStart[sid64] = {
+                count = count,
+                moves = {
+                    [1] = mvData
+                }
+            }
+        else
+            -- If we're waiting to find more clones
+            if moveStart[sid64].count > 0 then
+                local clone
+                -- Look for ones that are clones of this player that we haven't seen before
+                for _, e in ipairs(EntsFindByClass("ttt_randomat_cosmicclones_clone")) do
+                    if e:GetCloneOf() ~= ply:SteamID64() then continue end
+                    if e.RdmtCosmicCloneKnown then continue end
+                    clone = e
+                    break
+                end
+
+                -- If we found one, update its known state and the start information for this player
+                if clone then
+                    clone.RdmtCosmicCloneKnown = true
+
+                    for _, d in ipairs(moveStart[sid64].moves) do
+                        clone:AddMoveData(d)
+                    end
+
+                    moveStart[sid64].count = moveStart[sid64].count - 1
+                    if moveStart[sid64].count == 0 then
+                        if moveStart[sid64].SmokeEmitter then
+                            moveStart[sid64].SmokeEmitter:Finish()
+                        end
+
+                        moveStart[sid64].SmokeEmitter = nil
+                        moveStart[sid64].SmokeNextPart = nil
+                    end
+
+                    if not ply.RdmtCosmicClones then
+                        ply.RdmtCosmicClones = {}
+                    end
+                    TableInsert(ply.RdmtCosmicClones, clone)
+                end
+            end
+
+            -- This player already has one or more clones, update them
             if ply.RdmtCosmicClones then
                 for _, c in ipairs(ply.RdmtCosmicClones) do
                     if not IsValid(c) then continue end
                     c:AddMoveData(mvData)
                 end
             end
-        -- Start waiting to create the clone
-        elseif not moveStart[sid64] then
-            moveStart[sid64] = {
-                moves = {
-                    [1] = mvData
-                }
-            }
-        -- Keep track of any move data while the clone is being created
-        else
-            local clone
-            for _, e in ipairs(EntsFindByClass("ttt_randomat_cosmicclones_clone")) do
-                if e:GetCloneOf() ~= ply:SteamID64() then continue end
-                clone = e
-                break
-            end
 
-            if clone then
-                for _, d in ipairs(moveStart[sid64].moves) do
-                    clone:AddMoveData(d)
-                end
-
-                if moveStart[sid64].SmokeEmitter then
-                    moveStart[sid64].SmokeEmitter:Finish()
-                    moveStart[sid64].SmokeEmitter = nil
-                end
-                moveStart[sid64] = false
-                moveLast[sid64] = nil
-
-                if not ply.RdmtCosmicClones then
-                    ply.RdmtCosmicClones = {}
-                end
-                TableInsert(ply.RdmtCosmicClones, clone)
-            else
+            -- Keep track of any move data while clones are being created
+            if moveStart[sid64].count > 0 then
                 TableInsert(moveStart[sid64].moves, mvData)
             end
         end
@@ -129,7 +145,8 @@ function EVENT:Begin()
         local curTime = CurTime()
         local baseVel = Vector(0, 0, 4)
         for sid64, mv in pairs(moveStart) do
-            if mv == false then continue end
+            if not mv then continue end
+            if mv.count == 0 then continue end
 
             local ply = player.GetBySteamID64(sid64)
             if not IsPlayer(ply) then continue end
