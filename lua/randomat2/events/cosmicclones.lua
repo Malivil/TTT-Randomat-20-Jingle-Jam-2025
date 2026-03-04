@@ -13,7 +13,7 @@ local MathRound = math.Round
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
 
-util.AddNetworkString("RdmtCosmicCloneClear")
+util.AddNetworkString("RdmtCosmicCloneDeath")
 
 local EVENT = {}
 
@@ -24,7 +24,6 @@ EVENT.Categories = {"biased_traitor", "moderateimpact"}
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
 
-local darkRed = Color(136, 0, 0)
 local tickRate
 local moveStart = {}
 local moveLast = {}
@@ -38,8 +37,6 @@ local function CreateClone(ply, pos, ang, delay)
     for _, value in pairs(ply:GetBodyGroups()) do
         clone:SetBodygroup(value.id, ply:GetBodygroup(value.id))
     end
-    clone:SetColor(darkRed)
-    clone:SetMaterial("!RdmtCosmicCloneMaterial")
     clone:SetCloneOf(ply:SteamID64())
     clone:SetDelay(delay)
     clone:Spawn()
@@ -48,22 +45,26 @@ local function CreateClone(ply, pos, ang, delay)
     return clone
 end
 
-local function ClearClones(ply)
+local function OnPlayerDeath(ply)
     local sid64 = ply:SteamID64()
-    moveStart[sid64] = nil
-    moveLast[sid64] = nil
-    timer.Remove("RdmtCosmicCloneCreate_" .. sid64)
+    local mvData = {
+        time = CurTime(),
+        dead = true
+    }
+    if moveStart[sid64] then
+        TableInsert(moveStart[sid64].moves, mvData)
+    end
 
-    net.Start("RdmtCosmicCloneClear")
+    if ply.RdmtCosmicClones then
+        for _, c in ipairs(ply.RdmtCosmicClones) do
+            if not IsValid(c) then continue end
+            c:AddMoveData(mvData)
+        end
+    end
+
+    net.Start("RdmtCosmicCloneDeath")
         net.WritePlayer(ply)
     net.Broadcast()
-
-    if not ply.RdmtCosmicClones then return end
-
-    for _, c in ipairs(ply.RdmtCosmicClones) do
-        SafeRemoveEntity(c)
-    end
-    ply.RdmtCosmicClones = nil
 end
 
 function EVENT:Begin()
@@ -73,24 +74,16 @@ function EVENT:Begin()
     moveStart = {}
     moveLast = {}
 
-    -- Destroy clones and reset state when a player dies,
-    -- disconnects, or respawns. The logic in SetupMove
-    -- will automatically re-create the clone for the
-    -- respawned player
-    self:AddHook("PostPlayerDeath", ClearClones)
-    self:AddHook("PlayerDisconnected", ClearClones)
-    self:AddHook("PlayerSpawn", function(ply, transition)
-        ClearClones(ply)
-    end)
+    self:AddHook("PostPlayerDeath", OnPlayerDeath)
+    self:AddHook("PlayerDisconnected", OnPlayerDeath)
 
     self:AddHook("Think", function()
         local curTime = CurTime()
         for _, ply in PlayerIterator() do
+            if ply:IsBot() then continue end
+
             local sid64 = ply:SteamID64()
-            if not ply:Alive() or ply:IsSpec() then
-                moveStart[sid64] = nil
-                continue
-            end
+            if not ply:Alive() or ply:IsSpec() then continue end
 
             if moveLast[sid64] then
                 local diff = MathRound(curTime - moveLast[sid64], 3)
@@ -148,6 +141,7 @@ function EVENT:Begin()
                 -- This player already has one or more clones, update them
                 if ply.RdmtCosmicClones then
                     for _, c in ipairs(ply.RdmtCosmicClones) do
+                        if not IsValid(c) then continue end
                         c:AddMoveData(mvData)
                     end
                 end

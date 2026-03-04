@@ -9,14 +9,21 @@ local TableCount = table.Count
 local TableInsert = table.insert
 local TableRemove = table.remove
 
-ENT.FakeWep        = nil
-ENT.MoveData       = {}
+ENT.FakeWep       = nil
+ENT.MoveData      = {}
 
-ENT.Base           = "base_anim"
+ENT.Base          = "base_anim"
 
 if CLIENT then
-    ENT.PrintName  = "Cosmic Clone"
+    ENT.PrintName = "Cosmic Clone"
+else
+    ENT.IsDead    = false
 end
+
+ENT.CloneColor    = Color(136, 0, 0)
+ENT.CloneMaterial = "!RdmtCosmicCloneMaterial"
+ENT.DeadColor     = Color(255, 255, 255, 0)
+ENT.DeadMaterial  = ""
 
 function ENT:Initialize()
     self:SetMoveType(SOLID_NONE)
@@ -25,6 +32,8 @@ function ENT:Initialize()
     self:SetNoDraw(true)
     if SERVER then
         self:SetTrigger(true)
+        self:SetColor(self.CloneColor)
+        self:SetMaterial(self.CloneMaterial)
     end
 end
 
@@ -40,6 +49,8 @@ function ENT:Think()
 
     local curTime = CurTime()
 
+    print(curTime, mvData.time, curTime - mvData.time, mvData.dead)
+
     -- If we're less than 98% of the set delay (e.g. 4.9 for a 5 second delay)
     -- then just wait longer =)
     if (curTime - mvData.time) < (self:GetDelay() * 0.98) then return end
@@ -52,7 +63,8 @@ function ENT:Think()
         if not nextMvData then break end
 
         -- If the next move happened too long ago then skip it and try again
-        if curTime - mvData.time <= self:GetDelay() then
+        -- Don't ever skip a death data point
+        if mvData.dead or (curTime - mvData.time <= self:GetDelay()) then
             synchronized = true
         else
             idx = nextIdx
@@ -60,9 +72,17 @@ function ENT:Think()
         end
     end
 
+    if mvData.dead then
+        self:SetVisible(false)
+        if SERVER then
+            self.IsDead = true
+        end
+        return
+    end
+
+    self:SetVisible(true)
     self:SetPos(mvData.pos)
     if CLIENT then
-        self:SetNoDraw(false)
         self:SetAngles(mvData.ang)
         self:SetCycle(mvData.cyc)
         self:SetSequence(mvData.seq)
@@ -73,6 +93,7 @@ function ENT:Think()
 
         self:SetNextClientThink(curTime)
     else
+        self.IsDead = false
         self:UpdateWeaponModel(mvData.wep)
     end
 
@@ -83,7 +104,7 @@ end
 ENT.LastAdded = nil
 function ENT:AddMoveData(mvData)
     -- Don't allow duplicate values
-    if self.LastAdded then
+    if self.LastAdded and not self.LastAdded.dead and not mvData.dead then
         local samePos = self.LastAdded.pos:IsEqualTol(mvData.pos, 0)
 
         -- Check the server and client properties differently
@@ -115,6 +136,28 @@ function ENT:AddMoveData(mvData)
 
     self.LastAdded = mvData
     TableInsert(self.MoveData, mvData)
+end
+
+function ENT:SetVisible(visible)
+    if CLIENT then
+        if self:GetNoDraw() ~= visible then return end
+        self:SetNoDraw(not visible)
+    end
+    if SERVER and self.FakeWep then
+        self:SetNoDraw(true)
+        if self.FakeWep:GetNoDraw() ~= visible then return end
+        self.FakeWep:SetNoDraw(not visible)
+    end
+
+    if visible then
+        self:SetColor(self.CloneColor)
+        self:SetMaterial(self.CloneMaterial)
+        self:SetRenderMode(RENDERMODE_NORMAL)
+    else
+        self:SetColor(self.DeadColor)
+        self:SetMaterial(self.DeadMaterial)
+        self:SetRenderMode(RENDERMODE_TRANSALPHA)
+    end
 end
 
 if SERVER then
@@ -167,6 +210,8 @@ if SERVER then
     end
 
     function ENT:StartTouch(ent)
+        if self.IsDead then return end
+
         local damage = ent:Health()
         local att = player.GetBySteamID64(self:GetCloneOf())
         if not IsValid(att) or Randomat:ShouldActLikeJester(att) then

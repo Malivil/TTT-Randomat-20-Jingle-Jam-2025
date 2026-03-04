@@ -22,14 +22,8 @@ local tickRate
 local moveStart = {}
 local moveLast = {}
 
-local function ClearClones(ply)
-    local sid64 = ply:SteamID64()
-    moveStart[sid64] = nil
-    moveLast[sid64] = nil
-    ply.RdmtCosmicClones = nil
-end
-
--- TODO: Animations stop after each next clone spawns
+-- TODO: Animations stop after each next clone spawns (data stops sending)
+-- TODO: Smoke doesn't move to the new spawn location on death
 
 function EVENT:Begin()
     local count = GetConVar("randomat_cosmicclones_count"):GetInt()
@@ -53,43 +47,45 @@ function EVENT:Begin()
     self:AddHook("Think", function()
         local curTime = CurTime()
         for _, ply in PlayerIterator() do
+            if ply:IsBot() then continue end
+
             local sid64 = ply:SteamID64()
-            if not ply:Alive() or ply:IsSpec() then
-                moveStart[sid64] = nil
-                continue
+            local mvData
+            if ply:Alive() and not ply:IsSpec() then
+                if moveLast[sid64] then
+                    local diff = MathRound(curTime - moveLast[sid64], 3)
+                    if diff < tickRate then continue end
+                end
+
+                moveLast[sid64] = curTime
+
+                local poses = {}
+                for i = 0, ply:GetNumPoseParameters() - 1 do
+                    local poseMin, poseMax = ply:GetPoseParameterRange(i)
+                    local poseValue = MathRemap(ply:GetPoseParameter(i), 0, 1, poseMin, poseMax)
+                    poses[i] = poseValue
+                end
+
+                mvData = {
+                    time = curTime,
+                    pos = ply:GetPos(),
+                    ang = ply:GetRenderAngles(),
+                    seq = ply:GetSequence(),
+                    cyc = ply:GetCycle(),
+                    poses = poses
+                }
             end
-
-            if moveLast[sid64] then
-                local diff = MathRound(curTime - moveLast[sid64], 3)
-                if diff < tickRate then continue end
-            end
-
-            moveLast[sid64] = curTime
-
-            local poses = {}
-            for i = 0, ply:GetNumPoseParameters() - 1 do
-                local poseMin, poseMax = ply:GetPoseParameterRange(i)
-                local poseValue = MathRemap(ply:GetPoseParameter(i), 0, 1, poseMin, poseMax)
-                poses[i] = poseValue
-            end
-
-            local mvData = {
-                time = curTime,
-                pos = ply:GetPos(),
-                ang = ply:GetRenderAngles(),
-                seq = ply:GetSequence(),
-                cyc = ply:GetCycle(),
-                poses = poses
-            }
 
             -- Start waiting to create the clone
             if not moveStart[sid64] then
-                moveStart[sid64] = {
-                    count = count,
-                    moves = {
-                        [1] = mvData
+                if mvData then
+                    moveStart[sid64] = {
+                        count = count,
+                        moves = {
+                            [1] = mvData
+                        }
                     }
-                }
+                end
             else
                 -- If we're waiting to find more clones
                 if moveStart[sid64].count > 0 then
@@ -127,17 +123,19 @@ function EVENT:Begin()
                     end
                 end
 
-                -- This player already has one or more clones, update them
-                if ply.RdmtCosmicClones then
-                    for _, c in ipairs(ply.RdmtCosmicClones) do
-                        if not IsValid(c) then continue end
-                        c:AddMoveData(mvData)
+                if mvData then
+                    -- This player already has one or more clones, update them
+                    if ply.RdmtCosmicClones then
+                        for _, c in ipairs(ply.RdmtCosmicClones) do
+                            if not IsValid(c) then continue end
+                            c:AddMoveData(mvData)
+                        end
                     end
-                end
 
-                -- Keep track of any move data while clones are being created
-                if moveStart[sid64].count > 0 then
-                    TableInsert(moveStart[sid64].moves, mvData)
+                    -- Keep track of any move data while clones are being created
+                    if moveStart[sid64].count > 0 then
+                        TableInsert(moveStart[sid64].moves, mvData)
+                    end
                 end
             end
         end
@@ -174,16 +172,31 @@ function EVENT:Begin()
         end
     end)
 
-    net.Receive("RdmtCosmicCloneClear", function()
+    net.Receive("RdmtCosmicCloneDeath", function()
         local ply = net.ReadPlayer()
         if not IsPlayer(ply) then return end
-        ClearClones(ply)
+
+        local sid64 = ply:SteamID64()
+        local mvData = {
+            time = CurTime(),
+            dead = true
+        }
+        if moveStart[sid64] then
+            TableInsert(moveStart[sid64].moves, mvData)
+        end
+
+        if ply.RdmtCosmicClones then
+            for _, c in ipairs(ply.RdmtCosmicClones) do
+                if not IsValid(c) then continue end
+                c:AddMoveData(mvData)
+            end
+        end
     end)
 end
 
 function EVENT:End()
     for _, p in PlayerIterator() do
-        ClearClones(p)
+        p.RdmtCosmicClones = nil
     end
 
     moveStart = {}
