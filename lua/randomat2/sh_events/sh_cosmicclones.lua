@@ -1,0 +1,1 @@
+CreateConVar("randomat_cosmicclones_count", 1, FCVAR_REPLICATED, "How many clones to spawn for each player", 1, 5)

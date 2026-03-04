@@ -21,6 +21,7 @@ EVENT.Title = "Cosmic Clones"
 EVENT.id = "cosmicclones"
 -- TODO: Description, type, etc.
 -- TODO: GetConVars
+-- TODO: README
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
 
@@ -68,6 +69,7 @@ end
 
 function EVENT:Begin()
     local delay = GetConVar("randomat_cosmicclones_delay"):GetInt()
+    local count = GetConVar("randomat_cosmicclones_count"):GetInt()
     tickRate = MathRound(engine.TickInterval(), 3)
     moveStart = {}
     moveLast = {}
@@ -83,12 +85,13 @@ function EVENT:Begin()
     end)
 
     self:AddHook("SetupMove", function(ply, mv, cmd)
-        -- TODO: Remove
-        if ply:IsBot() then return end
-        if not ply:Alive() or ply:IsSpec() then return end
+        local sid64 = ply:SteamID64()
+        if not ply:Alive() or ply:IsSpec() then
+            moveStart[sid64] = nil
+            return
+        end
 
         local curTime = CurTime()
-        local sid64 = ply:SteamID64()
         if moveLast[sid64] then
             local diff = MathRound(curTime - moveLast[sid64], 3)
             if diff < tickRate then return end
@@ -106,16 +109,10 @@ function EVENT:Begin()
             mvData.wep = activeWep.WorldModel
         end
 
-        -- This player already has one or more clones, update them
-        if moveStart[sid64] == false then
-            if ply.RdmtCosmicClones then
-                for _, c in ipairs(ply.RdmtCosmicClones) do
-                    c:AddMoveData(mvData)
-                end
-            end
         -- Start waiting to create the clone
-        elseif not moveStart[sid64] then
+        if not moveStart[sid64] then
             moveStart[sid64] = {
+                count = count,
                 pos = ply:GetPos(),
                 ang = ply:GetAngles(),
                 moves = {
@@ -123,27 +120,42 @@ function EVENT:Begin()
                 }
             }
 
-            timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, 1, function()
+            timer.Create("RdmtCosmicCloneCreate_" .. sid64, delay, count, function()
                 if not IsValid(ply) then return end
-                local mvStart = moveStart[sid64]
 
                 -- Create the clone and pass any move history that we have
-                local clone = CreateClone(ply, mvStart.pos, mvStart.ang, delay)
+                -- Each successive clone should get another stack of delay
+                -- We track this by comparing how many clones we've created
+                -- versus the total, and adding 1 to make the baseline 1x
+                -- For 2 clones, the 1st clone would be:
+                --    delayMult = 1 + (2 - 2) = 1
+                -- And the second clone would be
+                --    delayMult = 1 + (2 - 1) = 2
+                local delayMult = 1 + (count - moveStart[sid64].count)
+                local clone = CreateClone(ply, moveStart[sid64].pos, moveStart[sid64].ang, delay * delayMult)
                 for _, d in ipairs(moveStart[sid64].moves) do
                     clone:AddMoveData(d)
                 end
 
-                moveStart[sid64] = false
-                moveLast[sid64] = nil
+                moveStart[sid64].count = moveStart[sid64].count - 1
 
                 if not ply.RdmtCosmicClones then
                     ply.RdmtCosmicClones = {}
                 end
                 TableInsert(ply.RdmtCosmicClones, clone)
             end)
-        -- Keep track of any move data while the clone is being created
         else
-            TableInsert(moveStart[sid64].moves, mvData)
+            -- This player already has one or more clones, update them
+            if ply.RdmtCosmicClones then
+                for _, c in ipairs(ply.RdmtCosmicClones) do
+                    c:AddMoveData(mvData)
+                end
+            end
+
+            -- Keep track of any move data while clones are being created
+            if moveStart[sid64].count > 0 then
+                TableInsert(moveStart[sid64].moves, mvData)
+            end
         end
     end)
 end
