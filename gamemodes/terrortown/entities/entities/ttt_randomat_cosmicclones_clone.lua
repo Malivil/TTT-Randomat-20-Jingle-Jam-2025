@@ -38,6 +38,8 @@ function ENT:Think()
     -- Sanity check
     if not mvData then return end
 
+    local curTime = CurTime()
+
     -- If we're less than 98% of the set delay (e.g. 4.9 for a 5 second delay)
     -- then just wait longer =)
     if (curTime - mvData.time) < (self:GetDelay() * 0.98) then return end
@@ -46,8 +48,7 @@ function ENT:Think()
     while not synchronized do
         TableRemove(self.MoveData, idx)
         local nextIdx, nextMvData = next(self.MoveData)
-        -- Sanity check
-        -- TODO: Should we "return" instead of break? This happened once in testing
+        -- Sanity check for when someone in fullscreen tabs out and the client stops tracking
         if not nextMvData then break end
 
         -- If the next move happened too long ago then skip it and try again
