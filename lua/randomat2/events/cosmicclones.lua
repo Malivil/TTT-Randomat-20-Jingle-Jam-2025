@@ -19,9 +19,8 @@ local EVENT = {}
 
 EVENT.Title = "Cosmic Clones"
 EVENT.id = "cosmicclones"
--- TODO: Description, type, etc.
--- TODO: GetConVars
--- TODO: README
+EVENT.Description = "Shadowy duplicates follow every living player, killing anyone they touch"
+EVENT.Categories = {"biased_traitor", "moderateimpact"}
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
 
@@ -176,6 +175,24 @@ end
 
 function EVENT:Condition()
     return navmesh.IsLoaded() and navmesh.GetNavAreaCount() > 0
+end
+
+function EVENT:GetConVars()
+    local sliders = {}
+    for _, v in ipairs({"count", "delay"}) do
+        local name = "randomat_" .. self.id .. "_" .. v
+        if ConVarExists(name) then
+            local convar = GetConVar(name)
+            table.insert(sliders, {
+                cmd = v,
+                dsc = convar:GetHelpText(),
+                min = convar:GetMin(),
+                max = convar:GetMax(),
+                dcm = 0
+            })
+        end
+    end
+    return sliders
 end
 
 Randomat:register(EVENT)

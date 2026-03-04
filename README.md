@@ -3,6 +3,17 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 
 # Events
 
+## Cosmic Clones
+_Suggested By_: NoxxFlame\
+Shadowy duplicates follow every living player, killing anyone they touch.
+\
+\
+_ttt_randomat_cosmicclones_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_cosmicclones_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_cosmicclones_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_cosmicclones_delay_ - Default: 5 - How long (in seconds) the delay should be between a user moving and their clone doing the same movement.\
+_randomat_cosmicclones_count_ - Default: 1 - How many clones to spawn for each player.
+
 ## Dancing Doppelgangers
 _Suggested By_: Spaaz\
 Doppelgangers spawn all around the map and dance randomly.
