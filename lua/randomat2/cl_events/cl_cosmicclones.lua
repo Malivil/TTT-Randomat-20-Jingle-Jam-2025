@@ -124,7 +124,7 @@ function EVENT:Begin()
                         clone.PositionCallback = function(c, p)
                             if c.RdmtCosmicCloneNum ~= count then return end
                             if #moveStart[sid64].spawns == 0 then return end
-                            if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 10) then return end
+                            if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 25) then return end
 
                             local spawn = TableRemove(moveStart[sid64].spawns, 1)
                             if spawn.SmokeEmitter then
