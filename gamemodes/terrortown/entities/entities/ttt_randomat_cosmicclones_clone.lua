@@ -26,6 +26,7 @@ ENT.CloneMaterial        = "!RdmtCosmicCloneMaterial"
 ENT.DeadColor            = Color(255, 255, 255, 0)
 ENT.DeadMaterial         = ""
 ENT.TickRate             = 0.1
+ENT.MaxTicks             = 10
 ENT.IsDead               = false
 
 function ENT:Initialize()
@@ -54,17 +55,23 @@ function ENT:SetNextThink(curTime)
     return true
 end
 
+ENT.LastTick = nil
 function ENT:Think()
     local curTime = CurTime()
+local lastTick = self.LastTick
+self.LastTick = curTime
     local idx, mvData = next(self.MoveData)
     -- Sanity check
     if not mvData then
+print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, "INVALID")
         return self:SetNextThink(curTime)
     end
 
+print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead)
 
-    -- If we're less than 10 ticks from the correct delay then just wait longer =)
-    if (curTime - mvData.time) < (self:GetDelay() - (self.TickRate * 10)) then
+    -- If we're less than the maximum ticks from the correct delay then just wait longer =)
+    if (self:GetDelay() - (curTime - mvData.time)) > (self.TickRate * self.MaxTicks) then
+print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "TR")
         return self:SetNextThink(curTime)
     end
 
@@ -80,6 +87,7 @@ function ENT:Think()
         if mvData.dead or (curTime - mvData.time <= self:GetDelay()) then
             synchronized = true
         else
+print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "SKIPPING")
             idx = nextIdx
             mvData = nextMvData
         end
@@ -87,6 +95,7 @@ function ENT:Think()
 
     if mvData.dead then
         self:SetDead(true)
+print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "DEAD")
         return self:SetNextThink(curTime)
     end
 
