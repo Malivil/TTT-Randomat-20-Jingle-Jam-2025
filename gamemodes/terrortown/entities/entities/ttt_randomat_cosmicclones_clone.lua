@@ -30,7 +30,8 @@ ENT.MaxTicks             = 10
 ENT.IsDead               = false
 
 function ENT:Initialize()
-    self:SetMoveType(SOLID_NONE)
+    self.TickRate = MathRound(engine.TickInterval(), 3)
+    self:SetMoveType(MOVETYPE_NONE)
     self:SetSolid(SOLID_BBOX)
     self:SetCollisionBounds(Vector(-16, -16, 0), Vector(16, 16, 84))
     if SERVER then
@@ -38,8 +39,6 @@ function ENT:Initialize()
         self:SetColor(self.CloneColor)
         self:SetMaterial(self.CloneMaterial)
     end
-
-    self.TickRate = MathRound(engine.TickInterval(), 3)
 end
 
 function ENT:SetupDataTables()
