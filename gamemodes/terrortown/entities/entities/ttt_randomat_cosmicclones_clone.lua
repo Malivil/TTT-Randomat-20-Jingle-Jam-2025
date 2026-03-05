@@ -1,10 +1,12 @@
 AddCSLuaFile()
 
 local ents = ents
+local math = math
 local pairs = pairs
 local table = table
 
 local EntsCreate = ents.Create
+local MathRound = math.Round
 local TableCount = table.Count
 local TableInsert = table.insert
 local TableRemove = table.remove
@@ -25,6 +27,7 @@ ENT.CloneColor           = Color(136, 0, 0)
 ENT.CloneMaterial        = "!RdmtCosmicCloneMaterial"
 ENT.DeadColor            = Color(255, 255, 255, 0)
 ENT.DeadMaterial         = ""
+ENT.TickRate             = 0.1
 
 function ENT:Initialize()
     self:SetMoveType(SOLID_NONE)
@@ -36,6 +39,8 @@ function ENT:Initialize()
         self:SetColor(self.CloneColor)
         self:SetMaterial(self.CloneMaterial)
     end
+
+    self.TickRate = MathRound(engine.TickInterval(), 3)
 end
 
 function ENT:SetupDataTables()
@@ -44,17 +49,25 @@ function ENT:SetupDataTables()
 end
 
 function ENT:Think()
+    local curTime = CurTime()
     local idx, mvData = next(self.MoveData)
     -- Sanity check
-    if not mvData then return end
+    if not mvData then
+        if CLIENT then
+            self:SetNextClientThink(curTime)
+        end
+        self:NextThink(curTime)
+        return true
+    end
 
-    local curTime = CurTime()
-
-    print(curTime, mvData.time, curTime - mvData.time, mvData.dead)
-
-    -- If we're less than 98% of the set delay (e.g. 4.9 for a 5 second delay)
-    -- then just wait longer =)
-    if (curTime - mvData.time) < (self:GetDelay() * 0.98) then return end
+    -- If we're less than 10 ticks from the correctly delay the then just wait longer =)
+    if (curTime - mvData.time) < (self:GetDelay() - (self.TickRate * 10)) then
+        if CLIENT then
+            self:SetNextClientThink(curTime)
+        end
+        self:NextThink(curTime)
+        return true
+    end
 
     local synchronized = false
     while not synchronized do
@@ -78,16 +91,20 @@ function ENT:Think()
         if SERVER then
             self.IsDead = true
         end
-        return
+        if CLIENT then
+            self:SetNextClientThink(curTime)
+        end
+        self:NextThink(curTime)
+        return true
     end
 
     self:SetVisible(true)
     self:SetPos(mvData.pos)
+    self:SetAngles(mvData.ang)
     if CLIENT then
         if self.PositionCallback then
             self.PositionCallback(self, mvData.pos)
         end
-        self:SetAngles(mvData.ang)
         self:SetCycle(mvData.cyc)
         self:SetSequence(mvData.seq)
         -- TODO: This doesn't handle weapon attacking like swinging the crowbar
@@ -145,13 +162,10 @@ function ENT:AddMoveData(mvData)
 end
 
 function ENT:SetVisible(visible)
-    if CLIENT then
-        if self:GetNoDraw() ~= visible then return end
-        self:SetNoDraw(not visible)
-    end
-    if SERVER and self.FakeWep then
-        self:SetNoDraw(true)
-        if self.FakeWep:GetNoDraw() ~= visible then return end
+    if self:GetNoDraw() ~= visible then return end
+    self:SetNoDraw(not visible)
+
+    if SERVER and self.FakeWep and self.FakeWep:GetNoDraw() ~= visible then
         self.FakeWep:SetNoDraw(not visible)
     end
 
@@ -205,12 +219,12 @@ if SERVER then
                 self.FakeWep:SetModel(model)
             end
 
-            if self.FakeWep:GetColor() ~= self:GetColor() then
-                self.FakeWep:SetColor(self:GetColor())
+            if self.FakeWep:GetColor() ~= self.CloneColor then
+                self.FakeWep:SetColor(self.CloneColor)
             end
 
-            if self.FakeWep:GetMaterial() ~= self:GetMaterial() then
-                self.FakeWep:SetMaterial(self:GetMaterial())
+            if self.FakeWep:GetMaterial() ~= self.CloneMaterial then
+                self.FakeWep:SetMaterial(self.CloneMaterial)
             end
         end
     end
