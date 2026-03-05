@@ -19,8 +19,6 @@ ENT.Base                 = "base_anim"
 if CLIENT then
     ENT.PrintName        = "Cosmic Clone"
     ENT.PositionCallback = nil
-else
-    ENT.IsDead           = false
 end
 
 ENT.CloneColor           = Color(136, 0, 0)
@@ -28,12 +26,12 @@ ENT.CloneMaterial        = "!RdmtCosmicCloneMaterial"
 ENT.DeadColor            = Color(255, 255, 255, 0)
 ENT.DeadMaterial         = ""
 ENT.TickRate             = 0.1
+ENT.IsDead               = false
 
 function ENT:Initialize()
     self:SetMoveType(SOLID_NONE)
     self:SetSolid(SOLID_BBOX)
     self:SetCollisionBounds(Vector(-16, -16, 0), Vector(16, 16, 84))
-    self:SetNoDraw(true)
     if SERVER then
         self:SetTrigger(true)
         self:SetColor(self.CloneColor)
@@ -48,25 +46,26 @@ function ENT:SetupDataTables()
  	self:NetworkVar("Int", "Delay")
 end
 
+function ENT:SetNextThink(curTime)
+    if CLIENT then
+        self:SetNextClientThink(curTime)
+    end
+    self:NextThink(curTime)
+    return true
+end
+
 function ENT:Think()
     local curTime = CurTime()
     local idx, mvData = next(self.MoveData)
     -- Sanity check
     if not mvData then
-        if CLIENT then
-            self:SetNextClientThink(curTime)
-        end
-        self:NextThink(curTime)
-        return true
+        return self:SetNextThink(curTime)
     end
+
 
     -- If we're less than 10 ticks from the correctly delay the then just wait longer =)
     if (curTime - mvData.time) < (self:GetDelay() - (self.TickRate * 10)) then
-        if CLIENT then
-            self:SetNextClientThink(curTime)
-        end
-        self:NextThink(curTime)
-        return true
+        return self:SetNextThink(curTime)
     end
 
     local synchronized = false
@@ -87,18 +86,11 @@ function ENT:Think()
     end
 
     if mvData.dead then
-        self:SetVisible(false)
-        if SERVER then
-            self.IsDead = true
-        end
-        if CLIENT then
-            self:SetNextClientThink(curTime)
-        end
-        self:NextThink(curTime)
-        return true
+        self:SetDead(true)
+        return self:SetNextThink(curTime)
     end
 
-    self:SetVisible(true)
+    self:SetDead(false)
     self:SetPos(mvData.pos)
     self:SetAngles(mvData.ang)
     if CLIENT then
@@ -111,15 +103,11 @@ function ENT:Think()
         for pose, val in pairs(mvData.poses) do
             self:SetPoseParameter(pose, val)
         end
-
-        self:SetNextClientThink(curTime)
     else
-        self.IsDead = false
         self:UpdateWeaponModel(mvData.wep)
     end
 
-    self:NextThink(curTime)
-    return true
+    return self:SetNextThink(curTime)
 end
 
 ENT.LastAdded = nil
@@ -161,22 +149,27 @@ function ENT:AddMoveData(mvData)
     TableInsert(self.MoveData, mvData)
 end
 
-function ENT:SetVisible(visible)
-    if self:GetNoDraw() ~= visible then return end
-    self:SetNoDraw(not visible)
+function ENT:SetDead(dead)
+    if self.IsDead == dead then return end
+    self.IsDead = dead
 
-    if SERVER and self.FakeWep and self.FakeWep:GetNoDraw() ~= visible then
-        self.FakeWep:SetNoDraw(not visible)
+    local clone = self
+    local function SetVisible(ent, visible)
+        ent:SetNoDraw(not visible)
+        if visible then
+            ent:SetColor(clone.CloneColor)
+            ent:SetMaterial(clone.CloneMaterial)
+            ent:SetRenderMode(RENDERMODE_NORMAL)
+        else
+            ent:SetColor(clone.DeadColor)
+            ent:SetMaterial(clone.DeadMaterial)
+            ent:SetRenderMode(RENDERMODE_TRANSALPHA)
+        end
     end
 
-    if visible then
-        self:SetColor(self.CloneColor)
-        self:SetMaterial(self.CloneMaterial)
-        self:SetRenderMode(RENDERMODE_NORMAL)
-    else
-        self:SetColor(self.DeadColor)
-        self:SetMaterial(self.DeadMaterial)
-        self:SetRenderMode(RENDERMODE_TRANSALPHA)
+    SetVisible(self, not dead)
+    if SERVER and self.FakeWep then
+        SetVisible(self.FakeWep, not dead)
     end
 end
 
