@@ -63,7 +63,7 @@ function ENT:Think()
     end
 
 
-    -- If we're less than 10 ticks from the correctly delay the then just wait longer =)
+    -- If we're less than 10 ticks from the correct delay then just wait longer =)
     if (curTime - mvData.time) < (self:GetDelay() - (self.TickRate * 10)) then
         return self:SetNextThink(curTime)
     end
