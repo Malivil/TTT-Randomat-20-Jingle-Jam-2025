@@ -115,6 +115,7 @@ function EVENT:Begin()
 
             local mvData = {
                 pos = ply:GetPos(),
+                ang = ply:GetAngles(),
                 time = curTime
             }
 
