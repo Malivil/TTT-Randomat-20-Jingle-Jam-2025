@@ -4,7 +4,7 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 # Events
 
 ## Dancing Doppelgangers
-_Suggested By_: Spaaz\
+_Suggested By and Code Contributed By_: Spaaz\
 Doppelgangers spawn all around the map and dance randomly.
 \
 \
@@ -122,4 +122,3 @@ _randomat_trampoline_min_speed_ - Default: 200 - The minimum fall speed a player
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
 - Nick and Spaaz for the idea for the "Jingle Jam 2025" event
-- Spaaz for some of the code used in the "Dancing Doppelgangers" event
