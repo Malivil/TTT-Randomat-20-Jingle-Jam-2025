@@ -23,8 +23,6 @@ local tickRate
 local moveStart = {}
 local moveLast = {}
 
--- TODO: Animations stop after each next clone spawns (data stops sending)
-
 function EVENT:Begin()
     local count = GetConVar("randomat_cosmicclones_count"):GetInt()
     tickRate = math.Round(engine.TickInterval(), 3)

@@ -29,6 +29,10 @@ ENT.TickRate             = 0.1
 ENT.MaxTicks             = 10
 ENT.IsDead               = false
 
+-- TODO: Animations stop after the local player dies
+-- TODO: Location de-sync between client and server
+-- TODO: Sometimes Touch doesn't work
+
 function ENT:Initialize()
     self.TickRate = MathRound(engine.TickInterval(), 3)
     self:SetMoveType(MOVETYPE_NONE)
