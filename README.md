@@ -120,5 +120,5 @@ _randomat_trampoline_radius_ - Default: 100 - The radius around a landing player
 _randomat_trampoline_min_speed_ - Default: 200 - The minimum fall speed a player must land with to launch others.
 
 # Special Thanks
-- [Game icons](https://game-icons.net/) for the role icons
+- [Game Icons](https://game-icons.net/) for the role icons
 - Nick and Spaaz for the idea for the "Jingle Jam 2025" event
