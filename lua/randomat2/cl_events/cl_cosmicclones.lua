@@ -4,7 +4,7 @@ local math = math
 local player = player
 local table = table
 
-local EntsFindByClass = ents.FindByClass
+local EntsCreateClient = ents.CreateClientside
 local MathRand = math.Rand
 local MathRandom = math.random
 local MathRound = math.Round
@@ -81,6 +81,11 @@ function EVENT:Begin()
                     cyc = ply:GetCycle(),
                     poses = poses
                 }
+
+                local activeWep = ply:GetActiveWeapon()
+                if IsValid(activeWep) and activeWep ~= NULL then
+                    mvData.wep = activeWep.WorldModel
+                end
             end
 
             -- Start waiting to create the clone
@@ -102,45 +107,6 @@ function EVENT:Begin()
                     }
                 end
             else
-                -- If we're waiting to find more clones
-                if moveStart[sid64].count > 0 then
-                    local clone
-                    -- Look for ones that are clones of this player that we haven't seen before
-                    for _, e in ipairs(EntsFindByClass("ttt_randomat_cosmicclones_clone")) do
-                        if e:GetCloneOf() ~= ply:SteamID64() then continue end
-                        if e.RdmtCosmicCloneKnown then continue end
-                        clone = e
-                        break
-                    end
-
-                    -- If we found one, update its known state and the start information for this player
-                    if clone then
-                        moveStart[sid64].count = moveStart[sid64].count - 1
-
-                        clone.RdmtCosmicCloneKnown = true
-                        clone.RdmtCosmicCloneNum = count - moveStart[sid64].count
-                        clone.PositionCallback = function(c, p)
-                            if c.RdmtCosmicCloneNum ~= count then return end
-                            if #moveStart[sid64].spawns == 0 then return end
-                            if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 25) then return end
-
-                            local spawn = TableRemove(moveStart[sid64].spawns, 1)
-                            if spawn.SmokeEmitter then
-                                spawn.SmokeEmitter:Finish()
-                            end
-                        end
-
-                        for _, d in ipairs(moveStart[sid64].moves) do
-                            clone:AddMoveData(d)
-                        end
-
-                        if not ply.RdmtCosmicClones then
-                            ply.RdmtCosmicClones = {}
-                        end
-                        TableInsert(ply.RdmtCosmicClones, clone)
-                    end
-                end
-
                 if mvData then
                     -- This player already has one or more clones, update them
                     if ply.RdmtCosmicClones then
@@ -187,6 +153,54 @@ function EVENT:Begin()
                     local r, g, b, _ = particleRed:Unpack()
                     particle:SetColor(r, g, b)
                 end
+            end
+        end
+    end)
+
+    net.Receive("RdmtCosmicCloneCreate", function()
+        local ply = net.ReadPlayer()
+        local pos = net.ReadVector()
+        local ang = net.ReadAngle()
+        local delay = net.ReadFloat()
+
+        local clone = EntsCreateClient("cl_ttt_randomat_cosmicclones_clone")
+        clone:SetPos(pos)
+        clone:SetAngles(ang)
+        clone:SetModel(ply:GetModel())
+        clone:SetSkin(ply:GetSkin())
+        for _, value in pairs(ply:GetBodyGroups()) do
+            clone:SetBodygroup(value.id, ply:GetBodygroup(value.id))
+        end
+        clone:SetDelay(delay)
+        clone:Spawn()
+        clone:Activate()
+
+        local sid64 = ply:SteamID64()
+        if moveStart[sid64].count > 0 then
+            if clone then
+                moveStart[sid64].count = moveStart[sid64].count - 1
+
+                clone.RdmtCosmicCloneKnown = true
+                clone.RdmtCosmicCloneNum = count - moveStart[sid64].count
+                clone.PositionCallback = function(c, p)
+                    if c.RdmtCosmicCloneNum ~= count then return end
+                    if #moveStart[sid64].spawns == 0 then return end
+                    if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 25) then return end
+
+                    local spawn = TableRemove(moveStart[sid64].spawns, 1)
+                    if spawn.SmokeEmitter then
+                        spawn.SmokeEmitter:Finish()
+                    end
+                end
+
+                for _, d in ipairs(moveStart[sid64].moves) do
+                    clone:AddMoveData(d)
+                end
+
+                if not ply.RdmtCosmicClones then
+                    ply.RdmtCosmicClones = {}
+                end
+                TableInsert(ply.RdmtCosmicClones, clone)
             end
         end
     end)

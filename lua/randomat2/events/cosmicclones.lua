@@ -14,6 +14,7 @@ local PlayerIterator = player.Iterator
 local TableInsert = table.insert
 local TableRemove = table.remove
 
+util.AddNetworkString("RdmtCosmicCloneCreate")
 util.AddNetworkString("RdmtCosmicCloneDeath")
 util.AddNetworkString("RdmtCosmicCloneRespawn")
 
@@ -41,8 +42,16 @@ local function CreateClone(ply, pos, ang, delay)
     end
     clone:SetCloneOf(ply:SteamID64())
     clone:SetDelay(delay)
+    clone:AddEFlags(EFL_SERVER_ONLY)
     clone:Spawn()
     clone:Activate()
+
+    net.Start("RdmtCosmicCloneCreate")
+        net.WritePlayer(ply)
+        net.WriteVector(pos)
+        net.WriteAngle(ang)
+        net.WriteFloat(delay)
+    net.Broadcast()
 
     return clone
 end
@@ -118,11 +127,6 @@ function EVENT:Begin()
                 ang = ply:GetAngles(),
                 time = curTime
             }
-
-            local activeWep = ply:GetActiveWeapon()
-            if IsValid(activeWep) and activeWep ~= NULL then
-                mvData.wep = activeWep.WorldModel
-            end
 
             -- Start waiting to create the clone
             if not moveStart[sid64] then
