@@ -55,6 +55,7 @@ _ttt_randomat_jinglejam2025_weight_ - Default: -1 - The weight this event should
 
 ## Just One More Thing... (aka Columbo)
 _Suggested By and Code Contributed By_: esoterica\
+_Depends On_: [Columbo Player Model by Spaaz](https://steamcommunity.com/sharedfiles/filedetails/?id=3677501760)\
 The detective can no longer take or deal damage, but traitors win when all non-detective innocents are dead.
 \
 \

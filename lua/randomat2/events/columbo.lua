@@ -58,7 +58,11 @@ end
 
 function EVENT:MakeColumbo(ply)
     timer.Simple(0.1, function()
-        -- TODO: Set player model
+        -- t player model if it exists
+        if util.IsModelLoaded("models/columbo/columbo.mdl") then
+            local SetMDL = FindMetaTable("Entity").SetModel
+            SetMDL(ply, "models/columbo/columbo.mdl")
+        end
         ply.RdmtIsColumbo = true
         local detectiveStr = string.lower(Randomat:GetRoleString(ROLE_DETECTIVE))
         Randomat:PrintMessage(ply, MSG_PRINTBOTH, "You are now Columbo, the shrewd and exceptionally observant homicide " .. detectiveStr)

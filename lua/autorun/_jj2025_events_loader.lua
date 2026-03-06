@@ -1,3 +1,3 @@
---if SERVER then
---    resource.AddWorkshop("TODO")
---end
+if SERVER then
+    resource.AddWorkshop("3679717751")
+end
