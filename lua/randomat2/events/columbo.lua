@@ -58,8 +58,11 @@ end
 
 function EVENT:MakeColumbo(ply)
     timer.Simple(0.1, function()
-        -- t player model if it exists
-        if util.IsModelLoaded("models/columbo/columbo.mdl") then
+        -- Set player model if it exists
+        if file.Exists("models/columbo/columbo.mdl", "GAME") then
+            if not ply.RdmtColumboModel then
+                ply.RdmtColumboModel = ply:GetModel()
+            end
             local SetMDL = FindMetaTable("Entity").SetModel
             SetMDL(ply, "models/columbo/columbo.mdl")
         end
@@ -123,7 +126,12 @@ function EVENT:Begin()
 end
 
 function EVENT:End()
+    local SetMDL = FindMetaTable("Entity").SetModel
     for _, p in PlayerIterator() do
+        if p.RdmtColumboModel then
+            SetMDL(p, p.RdmtColumboModel)
+            p.RdmtColumboModel = nil
+        end
         p.RdmtIsColumbo = nil
     end
 end
