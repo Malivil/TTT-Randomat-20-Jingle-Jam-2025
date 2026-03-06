@@ -4,7 +4,7 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 # Events
 
 ## Cosmic Clones
-_Suggested By_: NoxxFlame\
+_Suggested and Code Contributed By_: NoxxFlame\
 Shadowy duplicates follow every living player, killing anyone they touch.
 \
 \
