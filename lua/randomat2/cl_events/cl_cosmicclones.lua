@@ -46,8 +46,6 @@ function EVENT:Begin()
     self:AddHook("Think", function()
         local curTime = CurTime()
         for _, ply in PlayerIterator() do
-            if ply:IsBot() then continue end
-
             local sid64 = ply:SteamID64()
             if moveStart[sid64] then
                 -- Trim all move data that has been sent to all of the clones
