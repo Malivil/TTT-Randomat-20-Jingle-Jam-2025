@@ -44,7 +44,7 @@ _randomat_homealone_scale_ - Default: 0.75 - The scale factor to use for Kevin.
 
 ## Jingle Jam 2025
 _Contributed By_: Malivil\
-All ammo on the map has disappeared! Try jamming trash in your gun to reload instead....
+All ammo on the map has disappeared! Try jamming trash in your gun to reload instead...
 \
 \
 **ConVars**
@@ -95,7 +95,7 @@ _randomat_propfight_weight_mult_ - Default: 10 - The multiplier to use on the ma
 
 ## Scavenger Hunt
 _Contributed By_: Malivil\
-Find the props scattered around the map, first to get them all wins!.
+Find the props scattered around the map, first to get them all wins!
 \
 \
 **ConVars**
