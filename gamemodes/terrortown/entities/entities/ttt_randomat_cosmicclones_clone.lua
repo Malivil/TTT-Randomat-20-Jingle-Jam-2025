@@ -1,5 +1,3 @@
-AddCSLuaFile()
-
 local math = math
 local table = table
 
@@ -7,17 +5,13 @@ local MathRound = math.Round
 local TableInsert = table.insert
 local TableRemove = table.remove
 
-ENT.FakeWep              = nil
-ENT.MoveData             = {}
-
 ENT.Base                 = "base_anim"
 
-if CLIENT then
-    ENT.PrintName        = "Cosmic Clone"
-end
+ENT.MoveData             = {}
 
 ENT.TickRate             = 0.1
 ENT.MaxTicks             = 10
+
 ENT.IsDead               = false
 
 -- TODO: Sometimes Touch doesn't work
@@ -43,23 +37,19 @@ function ENT:SetNextThink(curTime)
     return true
 end
 
-ENT.LastTick = nil
 function ENT:Think()
     local curTime = CurTime()
-local lastTick = self.LastTick
-self.LastTick = curTime
     local idx, mvData = next(self.MoveData)
     -- Sanity check
     if not mvData then
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, "INVALID")
+        if not self.IsDead then
+            self.IsDead = true
+        end
         return self:SetNextThink(curTime)
     end
 
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead)
-
     -- If we're less than the maximum ticks from the correct delay then just wait longer =)
     if (self:GetDelay() - (curTime - mvData.time)) > (self.TickRate * self.MaxTicks) then
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "TR")
         return self:SetNextThink(curTime)
     end
 
@@ -75,7 +65,6 @@ print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvDat
         if mvData.dead or (curTime - mvData.time <= self:GetDelay()) then
             synchronized = true
         else
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "SKIPPING")
             idx = nextIdx
             mvData = nextMvData
         end
@@ -83,13 +72,11 @@ print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvDat
 
     if mvData.dead then
         self.IsDead = true
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "DEAD")
         return self:SetNextThink(curTime)
     end
 
     self.IsDead = false
     self:SetPos(mvData.pos)
-    self:SetAngles(mvData.ang)
 
     return self:SetNextThink(curTime)
 end

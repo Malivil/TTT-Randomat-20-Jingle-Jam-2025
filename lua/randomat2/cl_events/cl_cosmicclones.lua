@@ -4,6 +4,7 @@ local math = math
 local player = player
 local table = table
 
+local EntsFindByClass = ents.FindByClass
 local EntsCreateClient = ents.CreateClientside
 local MathRand = math.Rand
 local MathRandom = math.random
@@ -177,31 +178,30 @@ function EVENT:Begin()
 
         local sid64 = ply:SteamID64()
         if moveStart[sid64].count > 0 then
-            if clone then
-                moveStart[sid64].count = moveStart[sid64].count - 1
+            moveStart[sid64].count = moveStart[sid64].count - 1
 
-                clone.RdmtCosmicCloneKnown = true
-                clone.RdmtCosmicCloneNum = count - moveStart[sid64].count
-                clone.PositionCallback = function(c, p)
-                    if c.RdmtCosmicCloneNum ~= count then return end
-                    if #moveStart[sid64].spawns == 0 then return end
-                    if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 25) then return end
+            clone.RdmtCosmicCloneKnown = true
+            clone.RdmtCosmicCloneNum = count - moveStart[sid64].count
+            clone.PositionCallback = function(c, p)
+                if c.RdmtCosmicCloneNum ~= count then return end
+                if not moveStart[sid64] then return end
+                if #moveStart[sid64].spawns == 0 then return end
+                if not p:IsEqualTol(moveStart[sid64].spawns[1].pos, 25) then return end
 
-                    local spawn = TableRemove(moveStart[sid64].spawns, 1)
-                    if spawn.SmokeEmitter then
-                        spawn.SmokeEmitter:Finish()
-                    end
+                local spawn = TableRemove(moveStart[sid64].spawns, 1)
+                if spawn.SmokeEmitter then
+                    spawn.SmokeEmitter:Finish()
                 end
-
-                for _, d in ipairs(moveStart[sid64].moves) do
-                    clone:AddMoveData(d)
-                end
-
-                if not ply.RdmtCosmicClones then
-                    ply.RdmtCosmicClones = {}
-                end
-                TableInsert(ply.RdmtCosmicClones, clone)
             end
+
+            for _, d in ipairs(moveStart[sid64].moves) do
+                clone:AddMoveData(d)
+            end
+
+            if not ply.RdmtCosmicClones then
+                ply.RdmtCosmicClones = {}
+            end
+            TableInsert(ply.RdmtCosmicClones, clone)
         end
     end)
 
@@ -235,6 +235,10 @@ function EVENT:Begin()
 end
 
 function EVENT:End()
+    for _, e in ipairs(EntsFindByClass("cl_ttt_randomat_cosmicclones_clone")) do
+        SafeRemoveEntity(e)
+    end
+
     for _, p in PlayerIterator() do
         p.RdmtCosmicClones = nil
     end

@@ -1,4 +1,7 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+    return
+end
 
 local ents = ents
 local math = math
@@ -11,20 +14,20 @@ local TableCount = table.Count
 local TableInsert = table.insert
 local TableRemove = table.remove
 
-ENT.FakeWep              = nil
-ENT.MoveData             = {}
-
 ENT.Base                 = "base_anim"
+ENT.PrintName            = "Cosmic Clone"
 
-if CLIENT then
-    ENT.PrintName        = "Cosmic Clone"
-    ENT.PositionCallback = nil
-end
+ENT.FakeWep              = nil
+
+ENT.MoveData             = {}
+ENT.PositionCallback     = nil
 
 ENT.CloneColor           = Color(136, 0, 0)
 ENT.CloneMaterial        = "!RdmtCosmicCloneMaterial"
+
 ENT.TickRate             = 0.1
 ENT.MaxTicks             = 10
+
 ENT.IsDead               = false
 
 function ENT:Initialize()
@@ -42,23 +45,19 @@ function ENT:SetNextThink(curTime)
     return true
 end
 
-ENT.LastTick = nil
 function ENT:Think()
     local curTime = CurTime()
-local lastTick = self.LastTick
-self.LastTick = curTime
     local idx, mvData = next(self.MoveData)
     -- Sanity check
     if not mvData then
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, "INVALID")
+        if not self.IsDead then
+            self.IsDead = true
+        end
         return self:SetNextThink(curTime)
     end
 
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead)
-
     -- If we're less than the maximum ticks from the correct delay then just wait longer =)
     if (self:GetDelay() - (curTime - mvData.time)) > (self.TickRate * self.MaxTicks) then
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "TR")
         return self:SetNextThink(curTime)
     end
 
@@ -74,7 +73,6 @@ print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvDat
         if mvData.dead or (curTime - mvData.time <= self:GetDelay()) then
             synchronized = true
         else
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "SKIPPING")
             idx = nextIdx
             mvData = nextMvData
         end
@@ -82,7 +80,6 @@ print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvDat
 
     if mvData.dead then
         self.IsDead = true
-print(self:EntIndex(), curTime, curTime - (lastTick or 0), #self.MoveData, mvData.time, curTime - mvData.time, self:GetDelay() - (curTime - mvData.time), self.TickRate * self.MaxTicks, mvData.dead, "DEAD")
         return self:SetNextThink(curTime)
     end
 
@@ -136,7 +133,6 @@ function ENT:AddMoveData(mvData)
     self.LastAdded = mvData
     TableInsert(self.MoveData, mvData)
 end
-
 
 function ENT:OnRemove(fullUpdate)
     SafeRemoveEntity(self.FakeWep)
