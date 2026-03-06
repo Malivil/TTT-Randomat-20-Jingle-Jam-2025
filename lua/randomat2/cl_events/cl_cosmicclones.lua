@@ -59,7 +59,7 @@ function EVENT:Begin()
             end
 
             local mvData
-            if ply:Alive() and not ply:IsSpec() then
+            if not ply.RdmtCosmicCloneDead and ply:Alive() and not ply:IsSpec() then
                 if moveLast[sid64] then
                     local diff = MathRound(curTime - moveLast[sid64], 3)
                     if diff < tickRate then continue end
@@ -209,6 +209,8 @@ function EVENT:Begin()
         local ply = net.ReadPlayer()
         if not IsPlayer(ply) then return end
 
+        ply.RdmtCosmicCloneDead = true
+
         local sid64 = ply:SteamID64()
         local mvData = {
             time = CurTime(),
@@ -227,8 +229,13 @@ function EVENT:Begin()
     end)
 
     net.Receive("RdmtCosmicCloneRespawn", function()
-        local sid64 = net.ReadString()
+        local ply = net.ReadPlayer()
         local pos = net.ReadVector()
+        if not IsPlayer(ply) then return end
+
+        ply.RdmtCosmicCloneDead = false
+
+        local sid64 = ply:SteamID64()
         if not moveStart[sid64] then return end
         TableInsert(moveStart[sid64].spawns, { pos = pos })
     end)
@@ -240,6 +247,7 @@ function EVENT:End()
     end
 
     for _, p in PlayerIterator() do
+        p.RdmtCosmicCloneDead = nil
         p.RdmtCosmicClones = nil
     end
 

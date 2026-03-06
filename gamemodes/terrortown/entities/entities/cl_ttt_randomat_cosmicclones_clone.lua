@@ -50,9 +50,6 @@ function ENT:Think()
     local idx, mvData = next(self.MoveData)
     -- Sanity check
     if not mvData then
-        if not self.IsDead then
-            self.IsDead = true
-        end
         return self:SetNextThink(curTime)
     end
 

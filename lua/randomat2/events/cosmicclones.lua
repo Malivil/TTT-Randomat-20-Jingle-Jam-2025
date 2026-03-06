@@ -92,7 +92,7 @@ function EVENT:Begin()
         timer.Simple(0, function()
             if not IsPlayer(ply) then return end
             net.Start("RdmtCosmicCloneRespawn")
-                net.WriteString(ply:SteamID64())
+                net.WritePlayer(ply)
                 net.WriteVector(ply:GetPos())
             net.Broadcast()
         end)
