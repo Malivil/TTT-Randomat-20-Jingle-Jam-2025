@@ -88,7 +88,6 @@ function ENT:Think()
     end
     self:SetCycle(mvData.cyc)
     self:SetSequence(mvData.seq)
-    -- TODO: This doesn't handle weapon attacking like swinging the crowbar
     for pose, val in pairs(mvData.poses) do
         self:SetPoseParameter(pose, val)
     end
