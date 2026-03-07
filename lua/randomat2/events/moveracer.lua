@@ -21,10 +21,10 @@ CreateConVar("randomat_moveracer_timer", 15, FCVAR_NONE, "The amount of time pla
 local startingLength = 4
 local currentLength = nil
 local buttons = {}
-buttons["↑"] = IN_FORWARD
-buttons["↓"] = IN_BACK
-buttons["←"] = IN_MOVELEFT
-buttons["→"] = IN_MOVERIGHT
+buttons["FORWARD"] = IN_FORWARD
+buttons["BACK"] = IN_BACK
+buttons["LEFT"] = IN_MOVELEFT
+buttons["RIGHT"] = IN_MOVERIGHT
 buttons["CROUCH"] = IN_DUCK
 buttons["JUMP"] = IN_JUMP
 
@@ -110,7 +110,7 @@ function EVENT:Begin()
     timer.Create("RdmtTypeRacerDelay", time, 1, function()
         chosen = self:ChooseSequence(true, time)
 
-        timer.Create("RdmtTypeRacerTimer", time, 1, function()
+        timer.Create("RdmtTypeRacerTimer", time, 0, function()
             -- Kill everyone who hasn't answered the prompt correctly yet
             for _, p in ipairs(self:GetAlivePlayers()) do
                 if not safe[p:SteamID64()] then

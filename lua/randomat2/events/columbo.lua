@@ -141,7 +141,7 @@ function EVENT:Condition()
     if not detectives then return false end
 
     -- Explicitly ban any role that we know requires killing everyone but isn't independent
-    local banned_roles = {ROLE_CLOWN, ROLE_DETECTOCLOWN}
+    local banned_roles = {ROLE_DRUNK, ROLE_CLOWN, ROLE_DETECTOCLOWN}
     for _, p in PlayerIterator() do
         local role = p:GetRole()
         if TableHasValue(banned_roles, p) then return false end

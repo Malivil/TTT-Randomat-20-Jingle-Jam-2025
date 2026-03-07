@@ -52,6 +52,7 @@ function EVENT:Begin()
     Randomat:SetRole(kevin, ROLE_KEVIN, false)
     kevin:SetMaxHealth(kevin_health)
     kevin:SetHealth(kevin_health - (max_hp - kevin:Health()))
+    kevin:SetDefaultCredits()
     self:StripRoleWeapons(kevin)
 
     Randomat:SetPlayerScale(kevin, kevin_scale_val, self.id)

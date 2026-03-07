@@ -105,11 +105,15 @@ function EVENT:Begin()
         end
     end
 
-    -- Convert all players to vanilla roles and replace all their weapons with the rifle
     local new_traitors = {}
     local updated = false
     for _, p in PlayerIterator() do
-        if Randomat:IsInnocentTeam(p) then
+        if Randomat:IsDetectiveTeam(p) then
+            if p:GetRole() ~= ROLE_DETECTIVE then
+                Randomat:SetRole(p, ROLE_DETECTIVE)
+                updated = true
+            end
+        elseif Randomat:IsInnocentTeam(p) then
             if p:GetRole() ~= ROLE_INNOCENT then
                 Randomat:SetRole(p, ROLE_INNOCENT)
                 updated = true
