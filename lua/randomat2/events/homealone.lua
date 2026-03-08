@@ -20,6 +20,14 @@ function EVENT:Initialize()
 end
 
 function EVENT:Begin()
+    -- Print more detailed description
+    timer.Simple(5, function()
+        if self.Silent or Randomat:IsEventActive("secret") then return end
+
+        local msg = "Randomly changes a player into Kevin, an Independent who can buy trap weapons in the shop and must defeat all other players to win"
+        Randomat:SmallNotify(msg, nil, nil, true, false)
+        PrintMessage(HUD_PRINTTALK, "[RANDOMAT] " .. msg)
+    end)
     local kevin_scale_val = kevin_scale:GetFloat()
     local innocents = {}
     local special = nil
