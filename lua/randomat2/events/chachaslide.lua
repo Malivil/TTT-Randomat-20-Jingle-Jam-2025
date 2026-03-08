@@ -346,6 +346,7 @@ function EVENT:Begin()
     timer.Create("ChaChaSlide65", 216 * beatLength, 1, function() Dance(self) end)
 
     -- Turn it out
+    -- TODO: Something for this?
 
     -- To the left
     timer.Create("ChaChaSlide66", 228 * beatLength, 1, function() Left(self, 2) end)
@@ -420,7 +421,7 @@ function EVENT:Begin()
     timer.Create("ChaChaSlide113", 304 * beatLength, 1, function() Grow(self, 12) end)
     -- One hop
     timer.Create("ChaChaSlide114", 316 * beatLength, 1, function() Hop(self) end)
-    -- Right foot not
+    -- Right foot now
     timer.Create("ChaChaSlide115", 320 * beatLength, 1, function() Right(self, 0.25) end)
     -- Left foot now y'all
     timer.Create("ChaChaSlide116", 324 * beatLength, 1, function() Left(self, 0.25) end)
@@ -428,6 +429,7 @@ function EVENT:Begin()
     timer.Create("ChaChaSlide117", 328 * beatLength, 1, function() Dance(self) end)
 
     -- Turn it out
+    -- TODO: Something for this?
 
     -- To the left
     timer.Create("ChaChaSlide118", 340 * beatLength, 1, function() Left(self, 2) end)
