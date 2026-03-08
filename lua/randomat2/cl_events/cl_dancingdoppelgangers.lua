@@ -8,9 +8,9 @@ EVENT.id = "dancingdoppelgangers"
 function EVENT:Begin()
     net.Receive("RdmtDancingDoppelgangersCreated", function()
         local ent = net.ReadEntity()
+        local name = net.ReadString()
         if not IsValid(ent) then return end
 
-        local name = net.ReadString()
         ent.TargetIDHint = {
             entname = name,
             name = EVENT.id,
