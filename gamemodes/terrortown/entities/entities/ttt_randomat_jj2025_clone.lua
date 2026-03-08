@@ -39,6 +39,10 @@ function ENT:OnRemove(fullUpdate)
     self.FakeWep = nil
 end
 
+function ENT:OnKilled(dmginfo)
+    self:BecomeRagdoll(dmginfo)
+end
+
 local function AngleBetween(ang1, ang2)
     local vec1 = ang1:Forward()
     local vec2 = ang2:Forward()
