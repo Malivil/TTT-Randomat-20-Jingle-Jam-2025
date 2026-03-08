@@ -5,6 +5,7 @@ local PlayerIterator = player.Iterator
 local EVENT = {}
 
 CreateConVar("randomat_trampoline_stomp", 1, FCVAR_NONE, "Whether to allow stomp damage during the event", 0, 1)
+CreateConVar("randomat_trampoline_fall_damage", 1, FCVAR_NONE, "Whether players take fall damage during the event", 0, 1)
 CreateConVar("randomat_trampoline_radius", 100, FCVAR_NONE, "The radius around a landing player to launch others", 1, 100)
 CreateConVar("randomat_trampoline_min_speed", 200, FCVAR_NONE, "The minimum fall speed a player must land with to launch others", 1, 100)
 
@@ -19,8 +20,14 @@ function EVENT:Begin()
     end
 
     local trampoline_stomp = GetConVar("randomat_trampoline_stomp")
+    local trampoline_fall_damage = GetConVar("randomat_trampoline_fall_damage")
     self:AddHook("EntityTakeDamage", function(ent, dmginfo)
         if not IsPlayer(ent) then return end
+
+        -- Prevent fall damage if we have it disabled
+        if not trampoline_fall_damage:GetBool() and dmginfo:IsFallDamage() then
+            dmginfo:SetDamage(0)
+        end
 
         local att = dmginfo:GetAttacker()
         -- Disable goomba stomping other players (if convar says so)
@@ -81,7 +88,7 @@ function EVENT:GetConVars()
     end
 
     local checks = {}
-    for _, v in ipairs({"stomp"}) do
+    for _, v in ipairs({"fall_damage", "stomp"}) do
         local name = "randomat_" .. self.id .. "_" .. v
         if ConVarExists(name) then
             local convar = GetConVar(name)
