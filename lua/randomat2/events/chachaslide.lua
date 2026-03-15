@@ -7,9 +7,14 @@ local PlayerIterator = player.Iterator
 local EVENT = {}
 
 EVENT.Title = "This is something new..."
+EVENT.AltTitle = "Cha-Cha Slide"
 EVENT.Description = "Forces all players to dance to the Cha-Cha Slide"
 EVENT.id = "chachaslide"
 EVENT.IsEnabled = false
+
+CreateConVar("randomat_chachaslide_music", "0", FCVAR_NONE, "Whether to play the music", 0, 1)
+CreateConVar("randomat_chachaslide_endround", "0", FCVAR_NONE, "Whether to end the round when the song ends", 0, 1)
+CreateConVar("randomat_chachaslide_endround_kill", "0", FCVAR_NONE, "Whether to kill everyone when the song ends", 0, 1)
 
 local beatLength = 60/125
 
@@ -202,11 +207,15 @@ local function Reverse(owner)
     end
 end
 
-local function Kill(owner)
+local function End(owner)
+    if not GetConVar("randomat_chachaslide_endround"):GetBool() then return end
+
     -- Stop the win checks so someone else doesn't steal this player's win
     StopWinChecks()
     -- Delay the actual end for a second so the state has a chance to propagate
     timer.Simple(1, function() EndRound(WIN_JESTER) end)
+
+    if not GetConVar("randomat_chachaslide_endround_kill"):GetBool() then return end
 
     for _, ply in ipairs(owner:GetAlivePlayers()) do
         ply:Kill()
@@ -214,8 +223,10 @@ local function Kill(owner)
 end
 
 function EVENT:Begin()
-    for _, ply in PlayerIterator() do
-        ply:SendLua("surface.PlaySound(\"chachaslide.wav\")")
+    if GetConVar("randomat_chachaslide_music"):GetBool() then
+        for _, ply in PlayerIterator() do
+            ply:SendLua("surface.PlaySound(\"chachaslide.wav\")")
+        end
     end
 
     -- This is something new,
@@ -498,8 +509,7 @@ function EVENT:Begin()
     -- Oh yeah
     -- I'm outta here y'all
     -- Peace
-    -- TODO: Wrap this behind a convar
-    timer.Create("ChaChaSlide148", 475.2 * beatLength, 1, function() Kill(self) end)
+    timer.Create("ChaChaSlide148", 475.2 * beatLength, 1, function() End(self) end)
 end
 
 function EVENT:End()
@@ -521,6 +531,32 @@ function EVENT:End()
     end
 end
 
-Randomat:register(EVENT)
+function EVENT:Condition()
+    if not ROLE_JESTER or ROLE_JESTER == Randomat.MISSING_ROLE then return true end
 
-if SERVER then resource.AddSingleFile("sound/chachaslide.wav") end
+    -- Don't run this event if we have a jester
+    for _, v in player.Iterator() do
+        if v:GetRole() == ROLE_JESTER then
+            return false
+        end
+    end
+
+    return true
+end
+
+function EVENT:GetConVars()
+    local checks = {}
+    for _, v in ipairs({"music", "endround", "endround_kill"}) do
+        local name = "randomat_" .. self.id .. "_" .. v
+        if ConVarExists(name) then
+            local convar = GetConVar(name)
+            table.insert(checks, {
+                cmd = v,
+                dsc = convar:GetHelpText()
+            })
+        end
+    end
+    return {}, checks
+end
+
+Randomat:register(EVENT)
