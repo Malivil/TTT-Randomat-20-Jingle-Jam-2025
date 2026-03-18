@@ -22,7 +22,7 @@ local timerCount = 0
 
 local function CreateTimer(len, func)
     timerCount = timerCount + 1
-    timer.Create("ChaChaSlide" .. timerCount, len * beatLength, 1, function() func() end)
+    timer.Create("ChaChaSlide" .. timerCount, len * beatLength, 1, func)
 end
 
 local function Clap(owner)
