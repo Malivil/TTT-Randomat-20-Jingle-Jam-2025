@@ -12,11 +12,18 @@ EVENT.Description = "Forces all players to dance to the Cha-Cha Slide"
 EVENT.id = "chachaslide"
 EVENT.IsEnabled = false
 
-CreateConVar("randomat_chachaslide_music", "0", FCVAR_NONE, "Whether to play the music", 0, 1)
+CreateConVar("randomat_chachaslide_music", "1", FCVAR_NONE, "Whether to play the music", 0, 1)
+CreateConVar("randomat_chachaslide_text", "1", FCVAR_NONE, "Whether to show the lyrics on screen", 0, 1)
 CreateConVar("randomat_chachaslide_endround", "0", FCVAR_NONE, "Whether to end the round when the song ends", 0, 1)
 CreateConVar("randomat_chachaslide_endround_kill", "0", FCVAR_NONE, "Whether to kill everyone when the song ends", 0, 1)
 
 local beatLength = 60/125
+local timerCount = 0
+
+local function CreateTimer(len, func)
+    timerCount = timerCount + 1
+    timer.Create("ChaChaSlide" .. timerCount, len * beatLength, 1, function() func() end)
+end
 
 local function Clap(owner)
     for _, ply in ipairs(owner:GetAlivePlayers()) do
@@ -50,7 +57,7 @@ local function Left(owner, length)
         ply:ConCommand("+moveleft")
     end
 
-    timer.Simple(length * beatLength, function()
+    CreateTimer(length, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
         end
@@ -63,7 +70,7 @@ local function Right(owner, length)
         ply:ConCommand("+moveright")
     end
 
-    timer.Simple(length * beatLength, function()
+    CreateTimer(length, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
         end
@@ -76,7 +83,7 @@ local function Back(owner, length)
         ply:ConCommand("+back")
     end
 
-    timer.Simple(length * beatLength, function()
+    CreateTimer(length, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-back")
         end
@@ -89,7 +96,7 @@ local function Freeze(owner, length)
         ply:Freeze(true)
     end
 
-    timer.Simple(length * beatLength, function()
+    CreateTimer(length, function()
         for _, ply in ipairs(plys) do
             ply:Freeze(false)
         end
@@ -102,7 +109,7 @@ local function Crouch(owner, length)
         ply:ConCommand("+duck")
     end
 
-    timer.Simple(length * beatLength, function()
+    CreateTimer(length, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-duck")
         end
@@ -116,7 +123,7 @@ local function Grow(owner, length)
         ply:SetViewOffsetDucked(Vector(0, 0, 48))
     end
 
-    timer.Simple(length * beatLength, function()
+    CreateTimer(length, function()
         for _, ply in ipairs(plys) do
             ply:SetViewOffset(Vector(0, 0, 64))
             ply:SetViewOffsetDucked(Vector(0, 0, 32))
@@ -131,7 +138,7 @@ local function CrossLeft(owner)
         ply:ConCommand("+forward")
     end
 
-    timer.Simple(0.5 * beatLength, function()
+    CreateTimer(0.5, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-forward")
@@ -140,7 +147,7 @@ local function CrossLeft(owner)
         end
     end)
 
-    timer.Simple(1.5 * beatLength, function()
+    CreateTimer(1.5, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-back")
@@ -149,7 +156,7 @@ local function CrossLeft(owner)
         end
     end)
 
-    timer.Simple(2 * beatLength, function()
+    CreateTimer(2, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-forward")
@@ -164,7 +171,7 @@ local function CrossRight(owner)
         ply:ConCommand("+forward")
     end
 
-    timer.Simple(0.5 * beatLength, function()
+    CreateTimer(0.5, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-forward")
@@ -173,7 +180,7 @@ local function CrossRight(owner)
         end
     end)
 
-    timer.Simple(1.5 * beatLength, function()
+    CreateTimer(1.5, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-back")
@@ -182,7 +189,7 @@ local function CrossRight(owner)
         end
     end)
 
-    timer.Simple(2 * beatLength, function()
+    CreateTimer(2, function()
         for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-forward")
@@ -235,188 +242,188 @@ function EVENT:Begin()
     -- And this time were gonna get funky (funky funky)
 
     -- Everybody clap your hands
-    timer.Create("ChaChaSlide1", 36 * beatLength, 1, function() Clap(self) end)
+    CreateTimer(36, function() Clap(self) end)
     -- Clap, clap, clap
-    timer.Create("ChaChaSlide2", 37.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide3", 38.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide4", 39.5 * beatLength, 1, function() Clap(self) end)
+    CreateTimer(37.5, function() Clap(self) end)
+    CreateTimer(38.5, function() Clap(self) end)
+    CreateTimer(39.5, function() Clap(self) end)
     -- Clap your hands
-    timer.Create("ChaChaSlide5", 44 * beatLength, 1, function() Clap(self) end)
+    CreateTimer(44, function() Clap(self) end)
     -- Clap, clap, clap
-    timer.Create("ChaChaSlide6", 45.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide7", 46.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide8", 47.5 * beatLength, 1, function() Clap(self) end)
+    CreateTimer(45.5, function() Clap(self) end)
+    CreateTimer(46.5, function() Clap(self) end)
+    CreateTimer(47.5, function() Clap(self) end)
     -- Clap your hands
 
     -- Alright we gonna do the basic steps
 
     -- To the left
-    timer.Create("ChaChaSlide9", 56 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(56, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide10", 60 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(60, function() Back(self, 2) end)
     -- One hop this time
-    timer.Create("ChaChaSlide11", 64 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(64, function() Hop(self) end)
     -- Right foot lets stomp
-    timer.Create("ChaChaSlide12", 68 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(68, function() Right(self, 0.25) end)
     -- Left foot lets stomp
-    timer.Create("ChaChaSlide13", 72 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(72, function() Left(self, 0.25) end)
     -- Cha cha real smooth
-    timer.Create("ChaChaSlide14", 76 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(76, function() Dance(self) end)
 
     -- Turn it out
 
     -- To the left
-    timer.Create("ChaChaSlide15", 88 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(88, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide16", 92 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(92, function() Back(self, 2) end)
     -- One hop this time
-    timer.Create("ChaChaSlide17", 96 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(96, function() Hop(self) end)
     -- Right foot let's stomp
-    timer.Create("ChaChaSlide18", 100 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(100, function() Right(self, 0.25) end)
     -- Left foot let's stomp
-    timer.Create("ChaChaSlide19", 104 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(104, function() Left(self, 0.25) end)
     -- Cha cha real smooth
-    timer.Create("ChaChaSlide20", 108 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(108, function() Dance(self) end)
 
     -- Now its time to get funky
 
     -- To the right now
-    timer.Create("ChaChaSlide21", 116 * beatLength, 1, function() Right(self, 2) end)
+    CreateTimer(116, function() Right(self, 2) end)
     -- To the left now
-    timer.Create("ChaChaSlide22", 120 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(120, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide23", 124 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(124, function() Back(self, 2) end)
     -- One hop this time
-    timer.Create("ChaChaSlide24", 128 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(128, function() Hop(self) end)
     -- One hop this time
-    timer.Create("ChaChaSlide25", 132 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(132, function() Hop(self) end)
     -- Right foot two stomps
-    timer.Create("ChaChaSlide26", 136 * beatLength, 1, function() Right(self, 0.25) end)
-    timer.Create("ChaChaSlide27", 137 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(136, function() Right(self, 0.25) end)
+    CreateTimer(137, function() Right(self, 0.25) end)
     -- Left foot two stomps
-    timer.Create("ChaChaSlide28", 140 * beatLength, 1, function() Left(self, 0.25) end)
-    timer.Create("ChaChaSlide29", 141 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(140, function() Left(self, 0.25) end)
+    CreateTimer(141, function() Left(self, 0.25) end)
     -- Slide to the left
-    timer.Create("ChaChaSlide30", 144 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(144, function() Left(self, 2) end)
     -- Slide to the right
-    timer.Create("ChaChaSlide31", 148 * beatLength, 1, function() Right(self, 2) end)
+    CreateTimer(148, function() Right(self, 2) end)
     -- Criss Cross
-    timer.Create("ChaChaSlide32", 152 * beatLength, 1, function() CrossLeft(self) end)
+    CreateTimer(152, function() CrossLeft(self) end)
     -- Criss Cross
-    timer.Create("ChaChaSlide33", 156 * beatLength, 1, function() CrossRight(self) end)
+    CreateTimer(156, function() CrossRight(self) end)
     -- Cha cha real smooth
-    timer.Create("ChaChaSlide34", 160 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(160, function() Dance(self) end)
 
     -- Let's go to work
 
     -- To the left
-    timer.Create("ChaChaSlide35", 172 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(172, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide36", 176 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(176, function() Back(self, 2) end)
     -- Two hops this time
-    timer.Create("ChaChaSlide37", 180 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide38", 181 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(180, function() Hop(self) end)
+    CreateTimer(181, function() Hop(self) end)
     -- Two hops this time
-    timer.Create("ChaChaSlide39", 184 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide40", 185 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(184, function() Hop(self) end)
+    CreateTimer(185, function() Hop(self) end)
     -- Right foot two stomps
-    timer.Create("ChaChaSlide41", 188 * beatLength, 1, function() Right(self, 0.25) end)
-    timer.Create("ChaChaSlide42", 189 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(188, function() Right(self, 0.25) end)
+    CreateTimer(189, function() Right(self, 0.25) end)
     -- Left foot two stomps
-    timer.Create("ChaChaSlide43", 192 * beatLength, 1, function() Left(self, 0.25) end)
-    timer.Create("ChaChaSlide44", 193 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(192, function() Left(self, 0.25) end)
+    CreateTimer(193, function() Left(self, 0.25) end)
 
     -- Hands on your knees
-    timer.Create("ChaChaSlide45", 196 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide46", 197 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide47", 198 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide48", 299 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide49", 200 * beatLength, 1, function() Crouch(self, 0.5) end)
+    CreateTimer(196, function() Crouch(self, 0.5) end)
+    CreateTimer(197, function() Crouch(self, 0.5) end)
+    CreateTimer(198, function() Crouch(self, 0.5) end)
+    CreateTimer(299, function() Crouch(self, 0.5) end)
+    CreateTimer(200, function() Crouch(self, 0.5) end)
     -- Hands on your knees
-    timer.Create("ChaChaSlide50", 201 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide51", 202 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide52", 203 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide53", 204 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide54", 205 * beatLength, 1, function() Crouch(self, 0.5) end)
+    CreateTimer(201, function() Crouch(self, 0.5) end)
+    CreateTimer(202, function() Crouch(self, 0.5) end)
+    CreateTimer(203, function() Crouch(self, 0.5) end)
+    CreateTimer(204, function() Crouch(self, 0.5) end)
+    CreateTimer(205, function() Crouch(self, 0.5) end)
     -- Get funky with it
-    timer.Create("ChaChaSlide55", 206 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide56", 207 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide57", 208 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide58", 209 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide59", 210 * beatLength, 1, function() Crouch(self, 0.5) end)
+    CreateTimer(206, function() Crouch(self, 0.5) end)
+    CreateTimer(207, function() Crouch(self, 0.5) end)
+    CreateTimer(208, function() Crouch(self, 0.5) end)
+    CreateTimer(209, function() Crouch(self, 0.5) end)
+    CreateTimer(210, function() Crouch(self, 0.5) end)
     -- Oooooooh yea
-    timer.Create("ChaChaSlide60", 211 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide61", 212 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide62", 213 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide63", 214 * beatLength, 1, function() Crouch(self, 0.5) end)
-    timer.Create("ChaChaSlide64", 215 * beatLength, 1, function() Crouch(self, 0.5) end)
+    CreateTimer(211, function() Crouch(self, 0.5) end)
+    CreateTimer(212, function() Crouch(self, 0.5) end)
+    CreateTimer(213, function() Crouch(self, 0.5) end)
+    CreateTimer(214, function() Crouch(self, 0.5) end)
+    CreateTimer(215, function() Crouch(self, 0.5) end)
 
     -- Come on
 
     -- Cha cha now y'all
-    timer.Create("ChaChaSlide65", 216 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(216, function() Dance(self) end)
 
     -- Turn it out
     -- TODO: Something for this?
 
     -- To the left
-    timer.Create("ChaChaSlide66", 228 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(228, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide67", 232 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(232, function() Back(self, 2) end)
     -- Five hops this time
-    timer.Create("ChaChaSlide68", 236 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide69", 237 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide70", 238 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide71", 239 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide72", 240 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(236, function() Hop(self) end)
+    CreateTimer(237, function() Hop(self) end)
+    CreateTimer(238, function() Hop(self) end)
+    CreateTimer(239, function() Hop(self) end)
+    CreateTimer(240, function() Hop(self) end)
 
     -- Right foot let's stomp
-    timer.Create("ChaChaSlide73", 244 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(244, function() Right(self, 0.25) end)
     -- Left foot let's stomp
-    timer.Create("ChaChaSlide74", 248 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(248, function() Left(self, 0.25) end)
     -- Right foot again
-    timer.Create("ChaChaSlide75", 252 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(252, function() Right(self, 0.25) end)
     -- Left foot again
-    timer.Create("ChaChaSlide76", 256 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(256, function() Left(self, 0.25) end)
     -- Right foot let's stomp
-    timer.Create("ChaChaSlide77", 260 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(260, function() Right(self, 0.25) end)
     -- Left foot let's stomp
-    timer.Create("ChaChaSlide78", 264 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(264, function() Left(self, 0.25) end)
     -- Freeze!
-    timer.Create("ChaChaSlide79", 265.5 * beatLength, 1, function() Freeze(self, 6.5) end)
+    CreateTimer(265.5, function() Freeze(self, 6.5) end)
     -- EVERYBODY CLAP YOUR HANDS!
-    timer.Create("ChaChaSlide80", 272 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide81", 272.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide82", 273 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide83", 273.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide84", 274 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide85", 274.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide86", 275 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide87", 275.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide88", 276 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide89", 276.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide90", 277 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide91", 277.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide92", 278 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide93", 278.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide94", 279 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide95", 279.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide96", 280 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide97", 280.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide98", 281 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide99", 281.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide100", 282 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide101", 282.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide102", 283 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide103", 283.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide104", 284 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide105", 284.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide106", 285 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide107", 285.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide108", 286 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide109", 286.5 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide110", 287 * beatLength, 1, function() Clap(self) end)
-    timer.Create("ChaChaSlide111", 287.5 * beatLength, 1, function() Clap(self) end)
+    CreateTimer(272, function() Clap(self) end)
+    CreateTimer(272.5, function() Clap(self) end)
+    CreateTimer(273, function() Clap(self) end)
+    CreateTimer(273.5, function() Clap(self) end)
+    CreateTimer(274, function() Clap(self) end)
+    CreateTimer(274.5, function() Clap(self) end)
+    CreateTimer(275, function() Clap(self) end)
+    CreateTimer(275.5, function() Clap(self) end)
+    CreateTimer(276, function() Clap(self) end)
+    CreateTimer(276.5, function() Clap(self) end)
+    CreateTimer(277, function() Clap(self) end)
+    CreateTimer(277.5, function() Clap(self) end)
+    CreateTimer(278, function() Clap(self) end)
+    CreateTimer(278.5, function() Clap(self) end)
+    CreateTimer(279, function() Clap(self) end)
+    CreateTimer(279.5, function() Clap(self) end)
+    CreateTimer(280, function() Clap(self) end)
+    CreateTimer(280.5, function() Clap(self) end)
+    CreateTimer(281, function() Clap(self) end)
+    CreateTimer(281.5, function() Clap(self) end)
+    CreateTimer(282, function() Clap(self) end)
+    CreateTimer(282.5, function() Clap(self) end)
+    CreateTimer(283, function() Clap(self) end)
+    CreateTimer(283.5, function() Clap(self) end)
+    CreateTimer(284, function() Clap(self) end)
+    CreateTimer(284.5, function() Clap(self) end)
+    CreateTimer(285, function() Clap(self) end)
+    CreateTimer(285.5, function() Clap(self) end)
+    CreateTimer(286, function() Clap(self) end)
+    CreateTimer(286.5, function() Clap(self) end)
+    CreateTimer(287, function() Clap(self) end)
+    CreateTimer(287.5, function() Clap(self) end)
 
     -- Come on y'all
     -- Check it out y'all
@@ -425,95 +432,95 @@ function EVENT:Begin()
     -- Can you go down low
     -- All the way to the floor
     -- How low can you go
-    timer.Create("ChaChaSlide112", 288 * beatLength, 1, function() Crouch(self, 16) end)
+    CreateTimer(288, function() Crouch(self, 16) end)
     -- Can you bring it to the top
     -- Like you never never stop
     -- Can you bring it to the top
-    timer.Create("ChaChaSlide113", 304 * beatLength, 1, function() Grow(self, 12) end)
+    CreateTimer(304, function() Grow(self, 12) end)
     -- One hop
-    timer.Create("ChaChaSlide114", 316 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(316, function() Hop(self) end)
     -- Right foot now
-    timer.Create("ChaChaSlide115", 320 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(320, function() Right(self, 0.25) end)
     -- Left foot now y'all
-    timer.Create("ChaChaSlide116", 324 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(324, function() Left(self, 0.25) end)
     -- Cha cha real smooth
-    timer.Create("ChaChaSlide117", 328 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(328, function() Dance(self) end)
 
     -- Turn it out
     -- TODO: Something for this?
 
     -- To the left
-    timer.Create("ChaChaSlide118", 340 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(340, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide119", 344 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(344, function() Back(self, 2) end)
     -- One hop this time
-    timer.Create("ChaChaSlide120", 348 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(348, function() Hop(self) end)
     -- One hop this time
-    timer.Create("ChaChaSlide121", 352 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(352, function() Hop(self) end)
     -- Reverse
-    timer.Create("ChaChaSlide122", 356 * beatLength, 1, function() Reverse(self) end)
+    CreateTimer(356, function() Reverse(self) end)
     -- Reverse
-    timer.Create("ChaChaSlide123", 360 * beatLength, 1, function() Reverse(self) end)
+    CreateTimer(360, function() Reverse(self) end)
     -- Slide to the left
-    timer.Create("ChaChaSlide124", 364 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(364, function() Left(self, 2) end)
     -- Slide to the right
-    timer.Create("ChaChaSlide125", 368 * beatLength, 1, function() Right(self, 2) end)
+    CreateTimer(368, function() Right(self, 2) end)
     -- Reverse
-    timer.Create("ChaChaSlide126", 372 * beatLength, 1, function() Reverse(self) end)
+    CreateTimer(372, function() Reverse(self) end)
     -- Reverse
-    timer.Create("ChaChaSlide127", 373 * beatLength, 1, function() Reverse(self) end)
+    CreateTimer(373, function() Reverse(self) end)
     -- Reverse
-    timer.Create("ChaChaSlide128", 376 * beatLength, 1, function() Reverse(self) end)
+    CreateTimer(376, function() Reverse(self) end)
     -- Reverse
-    timer.Create("ChaChaSlide129", 377 * beatLength, 1, function() Reverse(self) end)
+    CreateTimer(377, function() Reverse(self) end)
     -- Cha cha now y'all
     -- Cha cha again
     -- Cha cha now y'all
     -- Cha cha again
-    timer.Create("ChaChaSlide130", 380 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(380, function() Dance(self) end)
 
     -- Turn it out
 
     -- To the left
-    timer.Create("ChaChaSlide131", 400 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(400, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide132", 404 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(404, function() Back(self, 2) end)
     -- Two hops two hops
-    timer.Create("ChaChaSlide133", 408 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide134", 409 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(408, function() Hop(self) end)
+    CreateTimer(409, function() Hop(self) end)
     -- Two hops two hops
-    timer.Create("ChaChaSlide135", 412 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide136", 413 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(412, function() Hop(self) end)
+    CreateTimer(413, function() Hop(self) end)
     -- Right foot let's stomp
-    timer.Create("ChaChaSlide137", 416 * beatLength, 1, function() Right(self, 0.25) end)
+    CreateTimer(416, function() Right(self, 0.25) end)
     -- Left foot let's stomp
-    timer.Create("ChaChaSlide138", 420 * beatLength, 1, function() Left(self, 0.25) end)
+    CreateTimer(420, function() Left(self, 0.25) end)
     -- Charlie brown
     -- Hop it out
-    timer.Create("ChaChaSlide139", 424 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide140", 425 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide141", 426 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide142", 427 * beatLength, 1, function() Hop(self) end)
-    timer.Create("ChaChaSlide143", 428 * beatLength, 1, function() Hop(self) end)
+    CreateTimer(424, function() Hop(self) end)
+    CreateTimer(425, function() Hop(self) end)
+    CreateTimer(426, function() Hop(self) end)
+    CreateTimer(427, function() Hop(self) end)
+    CreateTimer(428, function() Hop(self) end)
     -- Slide to the right
-    timer.Create("ChaChaSlide144", 432 * beatLength, 1, function() Right(self, 2) end)
+    CreateTimer(432, function() Right(self, 2) end)
     -- Slide to the left
-    timer.Create("ChaChaSlide145", 436 * beatLength, 1, function() Left(self, 2) end)
+    CreateTimer(436, function() Left(self, 2) end)
     -- Take it back now y'all
-    timer.Create("ChaChaSlide146", 440 * beatLength, 1, function() Back(self, 2) end)
+    CreateTimer(440, function() Back(self, 2) end)
     -- Cha cha now y'all
-    timer.Create("ChaChaSlide147", 444 * beatLength, 1, function() Dance(self) end)
+    CreateTimer(444, function() Dance(self) end)
     -- Oh yeah
     -- Yeah yeah
     -- Do that stuff
     -- Oh yeah
     -- I'm outta here y'all
     -- Peace
-    timer.Create("ChaChaSlide148", 475.2 * beatLength, 1, function() End(self) end)
+    CreateTimer(475.2, function() End(self) end)
 end
 
 function EVENT:End()
-    for i = 1, 148 do
+    for i = 1, timerCount do
         if timer.Exists("ChaChaSlide" .. i) then
             timer.Remove("ChaChaSlide" .. i)
         end
@@ -546,7 +553,7 @@ end
 
 function EVENT:GetConVars()
     local checks = {}
-    for _, v in ipairs({"music", "endround", "endround_kill"}) do
+    for _, v in ipairs({"music", "text", "endround", "endround_kill"}) do
         local name = "randomat_" .. self.id .. "_" .. v
         if ConVarExists(name) then
             local convar = GetConVar(name)
