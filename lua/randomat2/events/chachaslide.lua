@@ -155,7 +155,7 @@ local function Shrink(owner, length)
         }
     end
 
-    local segments = 5
+    local segments = 10
     local time = length / segments
     CreateTimer(time, function()
         for _, ply in ipairs(owner:GetAlivePlayers()) do
@@ -169,7 +169,7 @@ local function Shrink(owner, length)
 end
 
 local function Grow(owner, length)
-    local segments = 5
+    local segments = 10
     local time = length / segments
     CreateTimer(time, function(timerId)
         local theEnd = timer.RepsLeft(timerId) == 0
