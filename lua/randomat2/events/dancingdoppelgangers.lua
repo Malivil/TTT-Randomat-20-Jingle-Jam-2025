@@ -19,7 +19,7 @@ EVENT.Categories = {"smallimpact", "entityspawn", "fun"}
 CreateConVar("randomat_dancingdoppelgangers_count", 1, FCVAR_NONE, "How many clones should be spawned for each player", 1, 3)
 
 local function CreateClone(ply, pos, ang)
-    local clone = CreateEnt("ttt_randomat_jj2025_clone")
+    local clone = CreateEnt("ttt_randomat_dancingdoppelgangers_clone")
     clone:SetPos(pos)
     clone:SetAngles(ang)
     clone:SetModel(ply:GetModel())
