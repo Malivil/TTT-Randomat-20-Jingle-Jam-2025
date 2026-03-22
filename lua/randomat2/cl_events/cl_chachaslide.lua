@@ -7,6 +7,13 @@ local PlayerIterator = player.Iterator
 local EVENT = {}
 EVENT.id = "chachaslide"
 
+local function SetGesture(gest)
+    for _, p in PlayerIterator() do
+        if not p:Alive() or p:IsSpec() then continue end
+        p:AnimRestartGesture(GESTURE_SLOT_CUSTOM, gest, true)
+    end
+end
+
 function EVENT:Begin()
     if GetConVar("randomat_chachaslide_music"):GetBool() then
         surface.PlaySound("chachaslide.mp3")
@@ -15,23 +22,15 @@ function EVENT:Begin()
     local showThirdperson = false
     net.Receive("RdmtChaChaSlideDance", function()
         local len = net.ReadUInt(5)
-        for _, p in PlayerIterator() do
-            if not p:Alive() or p:IsSpec() then continue end
-            p:AnimRestartGesture(GESTURE_SLOT_CUSTOM, ACT_GMOD_TAUNT_DANCE, true)
-        end
+        SetGesture(ACT_GMOD_TAUNT_DANCE)
 
         showThirdperson = true
         timer.Create("RdmtChaChaSlideDanceEnd", len, 1, function()
-            for _, p in PlayerIterator() do
-                if not p:Alive() or p:IsSpec() then continue end
-                p:AnimRestartGesture(GESTURE_SLOT_CUSTOM, ACT_IDLE, true)
-            end
-
+            SetGesture(ACT_IDLE)
             showThirdperson = false
         end)
     end)
 
-    -- TODO: This doesn't work
     self:AddHook("CalcView", function(ply, pos, angles, fov, znear, zfar, drawviewer, ortho)
         if not showThirdperson then return end
         if ply ~= LocalPlayer() then return end
@@ -62,6 +61,10 @@ end
 
 function EVENT:End()
     RunConsoleCommand("stopsound")
+    if timer.Exists("RdmtChaChaSlideDanceEnd") then
+        timer.Remove("RdmtChaChaSlideDanceEnd")
+        SetGesture(ACT_IDLE)
+    end
 end
 
 Randomat:register(EVENT)
