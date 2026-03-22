@@ -3,6 +3,20 @@ A pack of [Randomat 2.0](https://github.com/Malivil/TTT-Randomat-20) events crea
 
 # Events
 
+## This is something new... (aka Cha-Cha Slide)
+_Suggested By_: Spineapple\
+_Code Contributed By_: NoxxFlame\
+Forces all players to dance to the Cha-Cha Slide.
+\
+\
+_ttt_randomat_chachaslide_ - Default: 1 - Whether this event is enabled.\
+_ttt_randomat_chachaslide_min_players_ - Default: 0 - The minimum number of players required for this event to start.\
+_ttt_randomat_chachaslide_weight_ - Default: -1 - The weight this event should use during the randomized event selection process.\
+_randomat_chachaslide_music_ - Default: 1 - Whether to play the music.\
+_randomat_chachaslide_text_ - Default: 1 - Whether to show the lyrics on screen.\
+_randomat_chachaslide_endround_ - Default: 0 - Whether to end the round when the song ends.\
+_randomat_chachaslide_endround_kill_ - Default: 0 - Whether to kill everyone when the song ends.
+
 ## Cosmic Clones
 _Suggested and Code Contributed By_: NoxxFlame\
 Shadowy duplicates follow every living player, killing anyone they touch.
