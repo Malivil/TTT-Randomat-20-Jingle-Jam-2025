@@ -107,11 +107,11 @@ local function Back(owner, length)
     end)
 end
 
-local function Turn(owner)
-    -- TODO: Doesn't always work
+local function Turn(owner, deg)
+    deg = deg or 90
     for _, ply in ipairs(owner:GetAlivePlayers()) do
         local eyeang = ply:EyeAngles()
-        eyeang.yaw = eyeang.yaw + 90
+        eyeang.yaw = eyeang.yaw + deg
         if eyeang.yaw > 180 then
             eyeang.yaw = eyeang.yaw - 360
         end
@@ -253,14 +253,7 @@ local function Dance(owner, len)
 end
 
 local function Reverse(owner)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
-        local eyeang = ply:EyeAngles()
-        eyeang.yaw = eyeang.yaw + 180
-        if eyeang.yaw > 180 then
-            eyeang.yaw = eyeang.yaw - 360
-        end
-        ply:SetEyeAngles(eyeang)
-    end
+    Turn(owner, 180)
 end
 
 local function End(owner)
@@ -354,29 +347,28 @@ function EVENT:Begin()
     -- This text actually starts before the last action completes
     CreateTextTimer(92.1, "Hands on your knees")
     CreateTextTimer(93.1, "Hands on your knees")
-    -- TODO: These don't really work
-    CreateTimer(93.9, function() Crouch(self, 0.4) end)
-    CreateTimer(94.3, function() Crouch(self, 0.4) end)
-    CreateTimer(94.7, function() Crouch(self, 0.4) end)
-    CreateTimer(95.1, function() Crouch(self, 0.4) end)
-    CreateTimer(95.5, function() Crouch(self, 0.4) end, "Get funky with it")
-    CreateTimer(95.9, function() Crouch(self, 0.4) end)
-    CreateTimer(96.3, function() Crouch(self, 0.4) end)
-    CreateTimer(96.7, function() Crouch(self, 0.4) end)
-    CreateTimer(97.1, function() Crouch(self, 0.4) end)
-    CreateTimer(97.3, function() Crouch(self, 0.4) end, "Oooooooh yea", 0.2)
-    CreateTimer(97.9, function() Crouch(self, 0.4) end)
-    CreateTimer(98.3, function() Crouch(self, 0.4) end)
-    CreateTimer(98.7, function() Crouch(self, 0.4) end)
-    CreateTimer(99.1, function() Crouch(self, 0.4) end)
-    CreateTimer(99.5, function() Crouch(self, 0.4) end)
-    CreateTimer(99.9, function() Crouch(self, 0.4) end)
-    CreateTimer(100.3, function() Crouch(self, 0.4) end)
-    CreateTimer(100.7, function() Crouch(self, 0.4) end)
-    CreateTimer(101.1, function() Crouch(self, 0.4) end)
-    CreateTimer(101.5, function() Crouch(self, 0.4) end, "Come on!")
-    CreateTimer(101.9, function() Crouch(self, 0.4) end)
-    CreateTimer(102.3, function() Crouch(self, 0.4) end)
+    CreateTimer(93.9, function() Crouch(self, 0.3) end)
+    CreateTimer(94.3, function() Crouch(self, 0.3) end)
+    CreateTimer(94.7, function() Crouch(self, 0.3) end)
+    CreateTimer(95.1, function() Crouch(self, 0.3) end)
+    CreateTimer(95.5, function() Crouch(self, 0.3) end, "Get funky with it")
+    CreateTimer(95.9, function() Crouch(self, 0.3) end)
+    CreateTimer(96.3, function() Crouch(self, 0.3) end)
+    CreateTimer(96.7, function() Crouch(self, 0.3) end)
+    CreateTimer(97.1, function() Crouch(self, 0.3) end)
+    CreateTimer(97.3, function() Crouch(self, 0.3) end, "Oooooooh yea", 0.2)
+    CreateTimer(97.9, function() Crouch(self, 0.3) end)
+    CreateTimer(98.3, function() Crouch(self, 0.3) end)
+    CreateTimer(98.7, function() Crouch(self, 0.3) end)
+    CreateTimer(99.1, function() Crouch(self, 0.3) end)
+    CreateTimer(99.5, function() Crouch(self, 0.3) end)
+    CreateTimer(99.9, function() Crouch(self, 0.3) end)
+    CreateTimer(100.3, function() Crouch(self, 0.3) end)
+    CreateTimer(100.7, function() Crouch(self, 0.3) end)
+    CreateTimer(101.1, function() Crouch(self, 0.3) end)
+    CreateTimer(101.5, function() Crouch(self, 0.3) end, "Come on!")
+    CreateTimer(101.9, function() Crouch(self, 0.3) end)
+    CreateTimer(102.3, function() Crouch(self, 0.3) end)
 
     CreateTimer(102.5, function() Dance(self, 3.4) end, "Cha-Cha now y'all", 1.3)
 
@@ -445,7 +437,7 @@ function EVENT:Begin()
     CreateTimer(154.4, function() Left(self, 0.25) end, "Left foot now y'all", 1.1)
     CreateTimer(156.2, function() Dance(self, 3.4) end, "Cha-Cha real smooth", 1.3)
 
-    CreateTimer(160, function() Turn(self) end, "Turn it out", 0.8)
+    CreateTimer(160, function() Turn(self) end, "Turn it out", 1)
 
     CreateTimer(162.4, function() Left(self, 2) end, "To the left")
     CreateTimer(164, function() Back(self, 2) end, "Take it back now y'all")
