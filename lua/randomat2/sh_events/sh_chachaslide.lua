@@ -1,0 +1,1 @@
+CreateConVar("randomat_chachaslide_music", "1", FCVAR_REPLICATED, "Whether to play the music", 0, 1)

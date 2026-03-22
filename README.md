@@ -133,3 +133,5 @@ _randomat_trampoline_min_speed_ - Default: 200 - The minimum fall speed a player
 # Special Thanks
 - [Game Icons](https://game-icons.net/) for the role icons
 - Nick and Spaaz for the idea for the "Jingle Jam 2025" event
+- Universal Records, a Division of UMG Recordings, Inc. for the [Cha-Cha Slide](https://www.youtube.com/watch?v=wZv62ShoStY) music used in the "This is something new..." event
+    - Song is property of its respective creators/owners
