@@ -14,6 +14,8 @@ EVENT.Title = "This is something new..."
 EVENT.AltTitle = "Cha-Cha Slide"
 EVENT.Description = "Forces all players to dance to the Cha-Cha Slide"
 EVENT.id = "chachaslide"
+EVENT.Type = EVENT_TYPE_MUSIC
+EVENT.Categories = {"fun", "largeimpact"}
 
 local chachaslide_text  = CreateConVar("randomat_chachaslide_text", "1", FCVAR_NONE, "Whether to show the lyrics on screen", 0, 1)
 CreateConVar("randomat_chachaslide_endround", "0", FCVAR_NONE, "Whether to end the round when the song ends", 0, 1)
@@ -60,13 +62,14 @@ local function Clap(owner)
 end
 
 local function Hop(owner)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:SetGravity(1.3)
         ply:ConCommand("+jump")
     end
 
     timer.Simple(0.2, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:SetGravity(1)
             ply:ConCommand("-jump")
         end
@@ -74,36 +77,39 @@ local function Hop(owner)
 end
 
 local function Left(owner, length)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveleft")
     end
 
     CreateTimer(length, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
         end
     end)
 end
 
 local function Right(owner, length)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveright")
     end
 
     CreateTimer(length, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
         end
     end)
 end
 
 local function Back(owner, length)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+back")
     end
 
     CreateTimer(length, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-back")
         end
     end)
@@ -122,24 +128,26 @@ local function Turn(owner, deg)
 end
 
 local function Freeze(owner, length)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:Freeze(true)
     end
 
     CreateTimer(length, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:Freeze(false)
         end
     end)
 end
 
 local function Crouch(owner, length)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+duck")
     end
 
     CreateTimer(length, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-duck")
         end
     end)
@@ -197,31 +205,36 @@ local function Grow(owner, length)
 end
 
 local function CrossLeft(owner)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveleft")
         ply:ConCommand("+forward")
     end
 
     CreateTimer(0.5, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-forward")
-            ply:ConCommand("+moveright")
-            ply:ConCommand("+back")
+            if ply:Alive() and not ply:IsSpec() then
+                ply:ConCommand("+moveright")
+                ply:ConCommand("+back")
+            end
         end
     end)
 
     CreateTimer(1.5, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-back")
-            ply:ConCommand("+moveleft")
-            ply:ConCommand("+forward")
+            if ply:Alive() and not ply:IsSpec() then
+                ply:ConCommand("+moveleft")
+                ply:ConCommand("+forward")
+            end
         end
     end)
 
     CreateTimer(2, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-forward")
         end
@@ -229,31 +242,36 @@ local function CrossLeft(owner)
 end
 
 local function CrossRight(owner)
-    for _, ply in ipairs(owner:GetAlivePlayers()) do
+    local plys = owner:GetAlivePlayers()
+    for _, ply in ipairs(plys) do
         ply:ConCommand("+moveright")
         ply:ConCommand("+forward")
     end
 
     CreateTimer(0.5, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-forward")
-            ply:ConCommand("+moveleft")
-            ply:ConCommand("+back")
+            if ply:Alive() and not ply:IsSpec() then
+                ply:ConCommand("+moveleft")
+                ply:ConCommand("+back")
+            end
         end
     end)
 
     CreateTimer(1.5, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveleft")
             ply:ConCommand("-back")
-            ply:ConCommand("+moveright")
-            ply:ConCommand("+forward")
+            if ply:Alive() and not ply:IsSpec() then
+                ply:ConCommand("+moveright")
+                ply:ConCommand("+forward")
+            end
         end
     end)
 
     CreateTimer(2, function()
-        for _, ply in ipairs(owner:GetAlivePlayers()) do
+        for _, ply in ipairs(plys) do
             ply:ConCommand("-moveright")
             ply:ConCommand("-forward")
         end

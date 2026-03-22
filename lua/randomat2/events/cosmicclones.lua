@@ -23,7 +23,7 @@ local EVENT = {}
 EVENT.Title = "Cosmic Clones"
 EVENT.id = "cosmicclones"
 EVENT.Description = "Shadowy duplicates follow every living player, killing anyone they touch"
-EVENT.Categories = {"biased_traitor", "moderateimpact"}
+EVENT.Categories = {"biased_traitor", "entityspawn", "moderateimpact"}
 
 CreateConVar("randomat_cosmicclones_delay", 5, FCVAR_NONE, "How long (in seconds) the delay should be between a user moving and their clone doing the same movement", 1, 60)
 

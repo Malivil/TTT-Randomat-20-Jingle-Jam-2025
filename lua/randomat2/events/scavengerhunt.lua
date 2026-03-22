@@ -25,7 +25,7 @@ local EVENT = {}
 EVENT.Title = "Scavenger Hunt"
 EVENT.Description = "Find the props scattered around the map, first to get them all wins!"
 EVENT.id = "scavengerhunt"
-EVENT.Categories = {"gamemode", "largeimpact"}
+EVENT.Categories = {"gamemode", "entityspawn", "largeimpact"}
 
 CreateConVar("randomat_scavengerhunt_count", 10, FCVAR_NONE, "The number of props a player has to find to win", 1, 25)
 
