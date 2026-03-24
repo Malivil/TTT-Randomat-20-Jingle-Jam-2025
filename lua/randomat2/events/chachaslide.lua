@@ -168,6 +168,8 @@ local function Shrink(owner, length)
     CreateTimer(time, function()
         for _, ply in ipairs(owner:GetAlivePlayers()) do
             local sid64 = ply:SteamID64()
+            if not startingOffsets[sid64] then continue end
+
             local amtNorm = (startingOffsets[sid64].norm - minViewOffset) / segments
             local amtDuck = (startingOffsets[sid64].duck - minViewOffset) / segments
             ply:SetViewOffset(Vector(0, 0, ply:GetViewOffset().z - amtNorm))
@@ -183,6 +185,8 @@ local function Grow(owner, length)
         local theEnd = timer.RepsLeft(timerId) == 0
         for _, ply in ipairs(owner:GetAlivePlayers()) do
             local sid64 = ply:SteamID64()
+            if not startingOffsets[sid64] then continue end
+
             local norm, duck
             if theEnd then
                 norm = startingOffsets[sid64].norm
