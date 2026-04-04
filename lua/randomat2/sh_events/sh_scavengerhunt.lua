@@ -8,7 +8,7 @@ local TableInsert = table.insert
 
 SCAVENGER_HUNT = {
     props = {
-        ballon_dog = "models/balloons/balloon_dog.mdl",
+        balloon_dog = "models/balloons/balloon_dog.mdl",
         binder = { "models/props_lab/binderblue.mdl", "models/props_lab/binderbluelabel.mdl", "models/props_lab/bindergraylabel01a.mdl", "models/props_lab/bindergraylabel01b.mdl", "models/props_lab/bindergreen.mdl", "models/props_lab/bindergreenlabel.mdl", "models/props_lab/binderredlabel.mdl" },
         bucket = "models/props_junk/MetalBucket01a.mdl",
         burger = "models/food/burger.mdl",
