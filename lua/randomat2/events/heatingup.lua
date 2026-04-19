@@ -21,34 +21,24 @@ CreateConVar("randomat_heatingup_damage_interval", 1, FCVAR_NONE, "How often the
 CreateConVar("randomat_heatingup_damage_amount", 1, FCVAR_NONE, "How much damage the lava should cause", 1, 10)
 
 function EVENT:Begin()
-    -- Find lowest weapon / ammo entity
+    -- Find lowest player
     local lowestZ = nil
-    for _, ent in ipairs(ents.FindByClass("item_*")) do
-        if IsValid(ent:GetParent()) then continue end
-        if ent:WaterLevel() ~= 0 then continue end
-        local entPos = ent:GetPos()
-        if not lowestZ or lowestZ > entPos.z then
-            lowestZ = entPos.z
-        end
-    end
-    for _, ent in ipairs(ents.FindByClass("weapon_*")) do
-        if IsValid(ent:GetParent()) then continue end
-        if ent:WaterLevel() ~= 0 then continue end
-        local entPos = ent:GetPos()
-        if not lowestZ or lowestZ > entPos.z then
-            lowestZ = entPos.z
+    for _, ply in ipairs(self:GetAlivePlayers()) do
+        local plyPos = ply:GetPos()
+        if not lowestZ or lowestZ > plyPos.z then
+            lowestZ = plyPos.z
         end
     end
     -- and start slightly under that
-    local lavaPos = Vector(0, 0, lowestZ - 5)
+    local lavaPos = lowestZ - 5
 
     -- Set timer for slowly moving the lava upward
     local move_interval = GetConVar("randomat_heatingup_move_interval")
     local move_amount = GetConVar("randomat_heatingup_move_amount")
     timer.Create("RdmtHeatingUpMoveTimer", move_interval:GetFloat(), 0, function()
-        lavaPos.z = lavaPos.z + move_amount:GetFloat()
+        lavaPos = lavaPos + move_amount:GetFloat()
         net.Start("RdmtHeatingUpMove")
-            net.WriteFloat(lavaPos.z)
+            net.WriteFloat(lavaPos)
         net.Broadcast()
     end)
 
@@ -60,11 +50,11 @@ function EVENT:Begin()
         dmginfo:SetAttacker(game.GetWorld())
         dmginfo:SetInflictor(game.GetWorld())
         dmginfo:SetDamageType(DMG_BURN)
-        dmginfo:SetDamagePosition(lavaPos)
 
         for _, p in PlayerIterator() do
             local playerPos = p:GetPos()
-            if playerPos.z <= lavaPos.z then
+            if playerPos.z <= lavaPos then
+                dmginfo:SetDamagePosition(playerPos)
                 p:TakeDamageInfo(dmginfo)
             end
         end
