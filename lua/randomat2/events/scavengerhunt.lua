@@ -142,10 +142,12 @@ function EVENT:Begin()
     local entsPos = {}
     for _, ent in ipairs(EntsFindByClass("item_*")) do
         if IsValid(ent:GetParent()) then continue end
+        if ent:WaterLevel() ~= 0 then continue end
         TableInsert(entsPos, ent:GetPos())
     end
     for _, ent in ipairs(EntsFindByClass("weapon_*")) do
         if IsValid(ent:GetParent()) then continue end
+        if ent:WaterLevel() ~= 0 then continue end
         TableInsert(entsPos, ent:GetPos())
     end
 
