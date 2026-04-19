@@ -24,12 +24,16 @@ function EVENT:Begin()
     -- Find lowest weapon / ammo entity
     local lowestZ = nil
     for _, ent in ipairs(ents.FindByClass("item_*")) do
+        if IsValid(ent:GetParent()) then continue end
+        if ent:WaterLevel() ~= 0 then continue end
         local entPos = ent:GetPos()
         if not lowestZ or lowestZ > entPos.z then
             lowestZ = entPos.z
         end
     end
     for _, ent in ipairs(ents.FindByClass("weapon_*")) do
+        if IsValid(ent:GetParent()) then continue end
+        if ent:WaterLevel() ~= 0 then continue end
         local entPos = ent:GetPos()
         if not lowestZ or lowestZ > entPos.z then
             lowestZ = entPos.z
