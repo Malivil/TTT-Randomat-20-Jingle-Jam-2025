@@ -77,6 +77,7 @@ function EVENT:Begin()
         -- If they pressed the wrong key, clear their sequence and stop checking
         else
             plySequence[sid64] = {}
+            ply:SendLua("surface.PlaySound(\"garrysmod/ui_return.wav\")")
             return
         end
 
@@ -89,14 +90,18 @@ function EVENT:Begin()
                 -- If they got one wrong, reset the sequence so they have to start again
                 if plySequence[sid64][i] ~= chosen[i] then
                     plySequence[sid64] = {}
+                    ply:SendLua("surface.PlaySound(\"garrysmod/ui_return.wav\")")
                     return
                 end
             end
         -- If they've pressed too many keys and haven't already completed the sequence (somehow), they messed up, reset them
         else
             plySequence[sid64] = {}
+            ply:SendLua("surface.PlaySound(\"garrysmod/ui_return.wav\")")
             return
         end
+
+        ply:SendLua("surface.PlaySound(\"garrysmod/ui_click.wav\")")
 
         local sequenceMatches = plySequenceLength == chosenLength
         if sequenceMatches then
