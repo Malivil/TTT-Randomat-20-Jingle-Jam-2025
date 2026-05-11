@@ -42,11 +42,8 @@ surface.CreateFont("RdmtScavengerHuntListComplete", {
 })
 
 net.Receive("RdmtScavengerHuntProps", function()
-    local client = LocalPlayer()
-    if not IsPlayer(client) then return end
-
     local props = net.ReadTable(true)
-    client.RdmtScavengerHuntTargets = props
+    Randomat.Client.RdmtScavengerHuntTargets = props
 end)
 
 local function HandleEntityHint(ent)
@@ -59,12 +56,10 @@ local function HandleEntityHint(ent)
         return
     end
 
-    local client = LocalPlayer()
-    if not IsPlayer(client) then return end
-    if not client:Alive() or client:IsSpec() then return end
-    if not SCAVENGER_HUNT:IsHuntTarget(client, entModel) then return end
+    if not Randomat.Client:Alive() or Randomat.Client:IsSpec() then return end
+    if not SCAVENGER_HUNT:IsHuntTarget(Randomat.Client, entModel) then return end
 
-    if SCAVENGER_HUNT:IsCollected(client, entModel) then
+    if SCAVENGER_HUNT:IsCollected(Randomat.Client, entModel) then
         return { hint = "scavengerhunt_hint_duplicate" }
     end
 
@@ -180,34 +175,29 @@ function EVENT:Begin()
         end)
     end)
 
-    local client = LocalPlayer()
-
     net.Receive("RdmtScavengerHuntCollected", function()
-        if not IsPlayer(client) then return end
-
         local model = net.ReadString()
 
         -- Sanity check
-        if not SCAVENGER_HUNT:IsHuntTarget(client, model) then return end
+        if not SCAVENGER_HUNT:IsHuntTarget(Randomat.Client, model) then return end
 
-        if not client.RdmtScavengerHuntCollected then
-            client.RdmtScavengerHuntCollected = {}
+        if not Randomat.Client.RdmtScavengerHuntCollected then
+            Randomat.Client.RdmtScavengerHuntCollected = {}
         end
 
         local name = SCAVENGER_HUNT:GetModelName(model)
-        TableInsert(client.RdmtScavengerHuntCollected, name)
-        Randomat:PrintMessage(client, MSG_PRINTBOTH, "You collected the '" .. LANG.GetTranslation("scavengerhunt_prop_" .. name) .. "'!")
+        TableInsert(Randomat.Client.RdmtScavengerHuntCollected, name)
+        Randomat:PrintMessage(Randomat.Client, MSG_PRINTBOTH, "You collected the '" .. LANG.GetTranslation("scavengerhunt_prop_" .. name) .. "'!")
     end)
 
     -- Checklist of props to find
     self:AddHook("HUDPaint", function()
-        if not IsPlayer(client) then return end
-        if not client.RdmtScavengerHuntTargets then return end
-        if not client:Alive() or client:IsSpec() then return end
+        if not Randomat.Client.RdmtScavengerHuntTargets then return end
+        if not Randomat.Client:Alive() or Randomat.Client:IsSpec() then return end
 
         local lineHeight = 20
         local margin = 8
-        local height = (#client.RdmtScavengerHuntTargets * lineHeight) + (margin * 3)
+        local height = (#Randomat.Client.RdmtScavengerHuntTargets * lineHeight) + (margin * 3)
         local topPos = (ScrH() / 2) - (height / 2)
         local leftPos = margin
 
@@ -226,8 +216,8 @@ function EVENT:Begin()
         SurfaceDrawText(text)
 
         -- Lines
-        for i, p in ipairs(client.RdmtScavengerHuntTargets) do
-            if client.RdmtScavengerHuntCollected and TableHasValue(client.RdmtScavengerHuntCollected, p) then
+        for i, p in ipairs(Randomat.Client.RdmtScavengerHuntTargets) do
+            if Randomat.Client.RdmtScavengerHuntCollected and TableHasValue(Randomat.Client.RdmtScavengerHuntCollected, p) then
                 SurfaceSetTextColor(COLOR_GREEN)
                 SurfaceSetFont("RdmtScavengerHuntListComplete")
             else

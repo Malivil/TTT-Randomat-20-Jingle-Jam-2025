@@ -30,8 +30,6 @@ function EVENT:Begin()
     moveStart = {}
     moveLast = {}
 
-    local client = LocalPlayer()
-
     CreateMaterial("RdmtCosmicCloneMaterial", "VertexLitGeneric", {
         ["$basetexture"] = "vgui/white",
         ["$model"] = 1,
@@ -124,8 +122,6 @@ function EVENT:Begin()
         end
 
         -- Show smoke where a clone is going to spawn
-        if not IsPlayer(client) then return end
-
         for sid64, mv in pairs(moveStart) do
             if #mv.spawns == 0 then continue end
 
@@ -136,7 +132,7 @@ function EVENT:Begin()
                 local pos = spawn.pos
                 if not spawn.SmokeEmitter then spawn.SmokeEmitter = ParticleEmitter(pos) end
                 if not spawn.SmokeNextPart then spawn.SmokeNextPart = curTime end
-                if spawn.SmokeNextPart < curTime and client:GetPos():Distance(pos) <= 3000 then
+                if spawn.SmokeNextPart < curTime and Randomat.Client:GetPos():Distance(pos) <= 3000 then
                     spawn.SmokeEmitter:SetPos(pos)
                     spawn.SmokeNextPart = curTime + MathRand(0.003, 0.01)
                     local vec = Vector(MathRand(-8, 8), MathRand(-8, 8), MathRand(10, 55))

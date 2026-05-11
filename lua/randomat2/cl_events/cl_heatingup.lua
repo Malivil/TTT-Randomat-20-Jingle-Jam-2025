@@ -33,11 +33,9 @@ function EVENT:Begin()
     end)
 
     self:AddHook("RenderScreenspaceEffects", function()
-        local client = LocalPlayer()
-        if not IsPlayer(client) then return end
-        if not client:Alive() then return end
+        if not Randomat.Client:Alive() then return end
 
-        local playerPos = client:EyePos()
+        local playerPos = Randomat.Client:EyePos()
         if playerPos.z <= lavaPos.z then
             DrawColorModify(lavaColorModifyTable)
         end

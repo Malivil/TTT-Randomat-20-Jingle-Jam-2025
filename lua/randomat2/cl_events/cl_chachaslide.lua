@@ -37,7 +37,7 @@ function EVENT:Begin()
 
     self:AddHook("CalcView", function(ply, pos, angles, fov, znear, zfar, drawviewer, ortho)
         if not showThirdperson then return end
-        if ply ~= LocalPlayer() then return end
+        if ply ~= Randomat.Client then return end
 
         local dist = 130
         local ang = Angle(0, angles.y, angles.r) + Angle(0, 180, 0)
