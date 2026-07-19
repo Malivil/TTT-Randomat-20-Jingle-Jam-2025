@@ -24,18 +24,18 @@ local EVENT = {}
 EVENT.id = "scavengerhunt"
 
 surface.CreateFont("RdmtScavengerHuntTitle", {
-    font = "Tahoma",
+    font = GAMEMODE_DEFAULT_UI_FONT or "Tahoma",
     size = 22,
     weight = 750,
     underline = true
 })
 surface.CreateFont("RdmtScavengerHuntList", {
-    font = "Tahoma",
+    font = GAMEMODE_DEFAULT_UI_FONT or "Tahoma",
     size = 18,
     weight = 750
 })
 surface.CreateFont("RdmtScavengerHuntListComplete", {
-    font = "Tahoma",
+    font = GAMEMODE_DEFAULT_UI_FONT or "Tahoma",
     size = 18,
     weight = 750,
     italic = true
