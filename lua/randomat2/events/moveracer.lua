@@ -112,10 +112,10 @@ function EVENT:Begin()
     end)
 
     local time = GetConVar("randomat_moveracer_timer"):GetInt()
-    timer.Create("RdmtTypeRacerDelay", time, 1, function()
+    timer.Create("RdmtMoveracerDelay", time, 1, function()
         chosen = self:ChooseSequence(true, time)
 
-        timer.Create("RdmtTypeRacerTimer", time, 0, function()
+        timer.Create("RdmtMoveracerTimer", time, 0, function()
             -- Kill everyone who hasn't answered the prompt correctly yet
             for _, p in ipairs(self:GetAlivePlayers()) do
                 if not safe[p:SteamID64()] then
