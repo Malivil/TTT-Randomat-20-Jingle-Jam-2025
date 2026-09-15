@@ -6,9 +6,6 @@ local TableInsert = table.insert
 local TableRemove = table.remove
 
 ENT.Base                 = "base_anim"
-if CLIENT then
-    ENT.PrintName        = "Cosmic Clone"
-end
 
 ENT.MoveData             = {}
 

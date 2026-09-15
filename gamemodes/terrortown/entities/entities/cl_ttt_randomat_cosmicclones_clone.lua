@@ -16,6 +16,7 @@ local TableRemove = table.remove
 
 ENT.Base                 = "base_anim"
 ENT.PrintName            = "Cosmic Clone"
+ENT.ScoreName            = "Cosmic Clone"
 
 ENT.FakeWep              = nil
 
