@@ -108,6 +108,7 @@ function EVENT:Begin()
             ply:PrintMessage(HUD_PRINTTALK, "You're safe!")
             Randomat:Notify("You're safe!", nil, ply)
             safe[sid64] = true
+            plySequence[sid64] = {}
         end
     end)
 
