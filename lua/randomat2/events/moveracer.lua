@@ -14,6 +14,7 @@ local EVENT = {}
 EVENT.Title = "Moveracer"
 EVENT.Description = "Press the movement buttons in the order given before time runs out OR DIE!"
 EVENT.id = "moveracer"
+EVENT.Type = EVENT_TYPE_TYPED_RESPONSE
 EVENT.Categories = {"gamemode", "largeimpact"}
 
 CreateConVar("randomat_moveracer_timer", 15, FCVAR_NONE, "The amount of time players have to press each sequence", 5, 60)
@@ -135,11 +136,6 @@ end
 function EVENT:End()
     timer.Remove("RdmtMoveracerDelay")
     timer.Remove("RdmtMoveracerTimer")
-end
-
--- "Secret" causes this event to essentially just kill everyone, since they can't see the prompts
-function EVENT:Condition()
-    return not Randomat:IsEventActive("secret")
 end
 
 function EVENT:GetConVars()
